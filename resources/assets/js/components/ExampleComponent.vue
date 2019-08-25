@@ -206,8 +206,23 @@
 
 <script>
     export default {
+        data () {
+            return {
+                name : ''
+            }
+        },
+        methods : {
+            listarGpermisos (){
+                axios.get('/Grupos_permisos').then(function (response){
+                    console.log(respomse);
+                })
+                .catch(function(error){
+                    console.log(error);
+                });
+            }
+        },
         mounted() {
-            console.log('Component mounted.')
+            console.log('Component mounted example.')
         }
     }
 </script>

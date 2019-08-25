@@ -14,3 +14,5 @@
 Route::get('/', function () {
     return view('contenido.contenido');
 });
+
+Route::resource('Grupos_permisos', 'Grupos_permisosController');
