@@ -4,9 +4,9 @@
     <ol class="breadcrumb">
       <li class="breadcrumb-item">Home</li>
       <li class="breadcrumb-item">
-        <a href="#">Admin</a>
+        Permisos y  Roles
       </li>
-      <li class="breadcrumb-item active">Dashboard</li>
+      <li class="breadcrumb-item active">Grupos Permisos</li>
     </ol>
     <div class="container-fluid">
       <!-- Ejemplo de tabla Listado -->
@@ -68,32 +68,27 @@
                   >
                     <i class="icon-pencil"></i>
                   </button> &nbsp;
-                  <button type="button" class="btn btn-danger btn-sm">
+                  <template v-if="item.status==1">
+                  <button type="button" class="btn btn-danger btn-sm" @click="eliminar(item.id)">
                     <i class="icon-trash"></i>
                   </button>
+                  </template>
                 </td>
               </tr>
             </tbody>
           </table>
           <nav>
             <ul class="pagination">
-              <li class="page-item">
-                <a class="page-link" href="#">Ant</a>
+              <li class="page-item"  v-if="pag.current_page > 1">
+                <a class="page-link" href="#" @click="cambiarPag(pag.current_page - 1)">Ant</a>
               </li>
-              <li class="page-item active">
-                <a class="page-link" href="#">1</a>
+
+              <li class="page-item " v-for="page in pagesNumber" :key="page" :class="[page == isActived ? 'active' : '']">
+                <a class="page-link" href="#" @click.prevent="cambiarPag(page)" v-text="page" ></a>
               </li>
-              <li class="page-item">
-                <a class="page-link" href="#">2</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#">3</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#">4</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#">Sig</a>
+
+              <li class="page-item"  v-if="pag.current_page < pag.last_page">
+                <a class="page-link" href="#"  @click="cambiarPag(pag.current_page + 1)">Sig</a>
               </li>
             </ul>
           </nav>
@@ -150,37 +145,7 @@
       <!-- /.modal-dialog -->
     </div>
     <!--Fin del modal-->
-    <!-- Inicio del modal Eliminar -->
-    <div
-      class="modal fade"
-      id="modalEliminar"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="myModalLabel"
-      style="display: none;"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-danger" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title">Eliminar Categoría</h4>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">×</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p>Estas seguro de eliminar la categoría?</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-            <button type="button" class="btn btn-danger">Eliminar</button>
-          </div>
-        </div>
-        <!-- /.modal-content -->
-      </div>
-      <!-- /.modal-dialog -->
-    </div>
-    <!-- Fin del modal Eliminar -->
+
   </main>
 </template>
 
@@ -195,20 +160,30 @@ export default {
       tituloModal: "",
       accion: 0,
       error: 0,
-      errores: []
+      errores: [],
+      pag: 0,
+      offset: 3
     };
   },
   methods: {
-    listar() {
+    listar(page) {
       let me = this;
+      var url = 'Grupos_permisos?page='+page;
       axios
-        .get("Grupos_permisos")
+        .get(url)
         .then(function(response) {
           me.lista = response.data.data;
+          delete(response.data.data);
+          me.pag=response.data;
         })
         .catch(function(error) {
           console.log(error);
         });
+    },
+    cambiarPag(page){
+        let me = this;
+        me.pag.current_page = page;
+        me.listar(page);
     },
     validar(){
         this.error=0;
@@ -247,7 +222,7 @@ export default {
         }
         let me = this;
          axios
-        .put("Grupos_permisos/"+this.pk,{
+        .put("Grupos_permisos/"+this.pk, {
             'id' : this.pk,
             'name' : this.name
         })
@@ -258,6 +233,56 @@ export default {
         .catch(function(error) {
           console.log(error);
         });
+    },
+    eliminar(id){
+const swalWithBootstrapButtons = Swal.mixin({
+  confirmButtonClass: 'btn btn-success',
+  cancelButtonClass: 'btn btn-danger',
+  buttonsStyling: false,
+});
+
+swalWithBootstrapButtons({
+  title: 'Seguro que desea Eliminar?',
+  text: "No podra deshacer!",
+  type: 'warning',
+  showCancelButton: true,
+  confirmButtonText: 'Aceptar',
+  cancelButtonText: 'Cancelar',
+  reverseButtons: true
+}).then((result) => {
+  if (result.value) {
+
+ let me = this;
+         axios
+        .delete("Grupos_permisos/"+id, {
+            'id' : id
+        })
+        .then(function(response) {
+            console.log(response);
+          me.listar();
+            swalWithBootstrapButtons(
+            'Borrado!',
+            'El registro se elimino.',
+            'success'
+            );
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+
+
+  } else if (
+    // Read more about handling dismissals
+    result.dismiss === Swal.DismissReason.cancel
+  ) {
+    swalWithBootstrapButtons(
+      'Cancelled',
+      'Your imaginary file is safe :)',
+      'error'
+    )
+  }
+})
+
     },
     cerrarModal() {
         this.modal = 0;
@@ -287,6 +312,31 @@ export default {
         }
       }
     }
+  },
+  computed: {
+      isActived: function(){
+          return this.pag.current_page;
+      },
+      pagesNumber: function(){
+          if (!this.pag.to){
+              return [];
+          }
+          var from = this.pag.current_page - this.offset;
+          if (from < 1){
+              from = 1;
+          }
+          var to = from + (this.offset * 2);
+          if (to >= this.pag.last_page){
+              to = this.pag.last_page;
+          }
+          var pagesArray = [];
+          while (from <= to){
+              pagesArray.push(from);
+              from++;
+          }
+          return pagesArray;
+
+      }
   },
   mounted() {
     this.listar();

@@ -20,7 +20,7 @@ class Grupos_permisosController extends Controller
 
     public function index(Request $request)
     {
-        $datos = Grupos_permisos::paginate();
+        $datos = Grupos_permisos::paginate(2);
         if ($request->ajax()) {
             return  $datos;
         } else {
@@ -63,10 +63,11 @@ class Grupos_permisosController extends Controller
         $datos->save();
     }
 
-    public function status($id)
+    public function destroy($id)
     {
+        // TODO: Hacer el borrado de acuerdo si tiene una relacion o no
         $datos = Grupos_permisos::findOrFail($id);
-        $datos->status = $status;
+        $datos->status = ($datos->status==1) ? 0 : 1 ;
         $datos->save();
     }
 }
