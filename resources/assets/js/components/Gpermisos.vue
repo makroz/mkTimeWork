@@ -25,17 +25,17 @@
           <div class="form-group row">
             <div class="col-md-6">
               <div class="input-group">
-                <select class="form-control col-md-3" id="opcion" name="opcion">
-                  <option value="nombre">Nombre</option>
+                <select class="form-control col-md-3" v-model="criterio">
+                  <option value="name">Nombre</option>
                 </select>
                 <input
                   type="text"
-                  id="texto"
-                  name="texto"
                   class="form-control"
                   placeholder="Texto a buscar"
+                  v-model="buscar"
+                  @keyup.enter="listar(1,buscar,criterio)"
                 />
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" @click="listar(1,buscar,criterio)">
                   <i class="fa fa-search"></i> Buscar
                 </button>
               </div>
@@ -154,10 +154,12 @@ export default {
   data() {
     return {
         pk:0,
-      name: "",
+      name: '',
+      criterio: 'name',
+      buscar: '',
       lista: [],
       modal: 0,
-      tituloModal: "",
+      tituloModal: '',
       accion: 0,
       error: 0,
       errores: [],
@@ -166,24 +168,32 @@ export default {
     };
   },
   methods: {
-    listar(page) {
+    listar(page,buscar,criterio) {
       let me = this;
-      var url = 'Grupos_permisos?page='+page;
+      page = page || me.current_page || 1;
+      buscar = buscar || me.buscar;
+      criterio = criterio || me.criterio;
+
+      var url = 'Grupos_permisos?page=' + page + '&buscar=' + buscar + '&criterio=' + criterio;
       axios
         .get(url)
         .then(function(response) {
           me.lista = response.data.data;
           delete(response.data.data);
           me.pag=response.data;
+          me.current_page=page;
+          me.buscar=buscar;
+          me.criterio.criterio;
+
         })
         .catch(function(error) {
           console.log(error);
         });
     },
-    cambiarPag(page){
+    cambiarPag(page,buscar,criterio){
         let me = this;
-        me.pag.current_page = page;
-        me.listar(page);
+        //me.pag.current_page = page;
+        me.listar(page,buscar,criterio);
     },
     validar(){
         this.error=0;
@@ -210,7 +220,7 @@ export default {
         })
         .then(function(response) {
           me.cerrarModal();
-          me.listar();
+          me.listar(1);
         })
         .catch(function(error) {
           console.log(error);

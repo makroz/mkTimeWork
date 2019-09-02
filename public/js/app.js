@@ -2230,10 +2230,12 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       pk: 0,
-      name: "",
+      name: '',
+      criterio: 'name',
+      buscar: '',
       lista: [],
       modal: 0,
-      tituloModal: "",
+      tituloModal: '',
       accion: 0,
       error: 0,
       errores: [],
@@ -2242,21 +2244,27 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   methods: {
-    listar: function listar(page) {
+    listar: function listar(page, buscar, criterio) {
       var me = this;
-      var url = 'Grupos_permisos?page=' + page;
+      page = page || me.current_page || 1;
+      buscar = buscar || me.buscar;
+      criterio = criterio || me.criterio;
+      var url = 'Grupos_permisos?page=' + page + '&buscar=' + buscar + '&criterio=' + criterio;
       axios.get(url).then(function (response) {
         me.lista = response.data.data;
         delete response.data.data;
         me.pag = response.data;
+        me.current_page = page;
+        me.buscar = buscar;
+        me.criterio.criterio;
       })["catch"](function (error) {
         console.log(error);
       });
     },
-    cambiarPag: function cambiarPag(page) {
-      var me = this;
-      me.pag.current_page = page;
-      me.listar(page);
+    cambiarPag: function cambiarPag(page, buscar, criterio) {
+      var me = this; //me.pag.current_page = page;
+
+      me.listar(page, buscar, criterio);
     },
     validar: function validar() {
       this.error = 0;
@@ -2282,7 +2290,7 @@ __webpack_require__.r(__webpack_exports__);
         'name': this.name
       }).then(function (response) {
         me.cerrarModal();
-        me.listar();
+        me.listar(1);
       })["catch"](function (error) {
         console.log(error);
       });
@@ -38955,13 +38963,100 @@ var render = function() {
         ]),
         _vm._v(" "),
         _c("div", { staticClass: "card-body" }, [
-          _vm._m(1),
+          _c("div", { staticClass: "form-group row" }, [
+            _c("div", { staticClass: "col-md-6" }, [
+              _c("div", { staticClass: "input-group" }, [
+                _c(
+                  "select",
+                  {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.criterio,
+                        expression: "criterio"
+                      }
+                    ],
+                    staticClass: "form-control col-md-3",
+                    on: {
+                      change: function($event) {
+                        var $$selectedVal = Array.prototype.filter
+                          .call($event.target.options, function(o) {
+                            return o.selected
+                          })
+                          .map(function(o) {
+                            var val = "_value" in o ? o._value : o.value
+                            return val
+                          })
+                        _vm.criterio = $event.target.multiple
+                          ? $$selectedVal
+                          : $$selectedVal[0]
+                      }
+                    }
+                  },
+                  [
+                    _c("option", { attrs: { value: "name" } }, [
+                      _vm._v("Nombre")
+                    ])
+                  ]
+                ),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.buscar,
+                      expression: "buscar"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: { type: "text", placeholder: "Texto a buscar" },
+                  domProps: { value: _vm.buscar },
+                  on: {
+                    keyup: function($event) {
+                      if (
+                        !$event.type.indexOf("key") &&
+                        _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+                      ) {
+                        return null
+                      }
+                      return _vm.listar(1, _vm.buscar, _vm.criterio)
+                    },
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.buscar = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { type: "submit" },
+                    on: {
+                      click: function($event) {
+                        return _vm.listar(1, _vm.buscar, _vm.criterio)
+                      }
+                    }
+                  },
+                  [
+                    _c("i", { staticClass: "fa fa-search" }),
+                    _vm._v(" Buscar\n              ")
+                  ]
+                )
+              ])
+            ])
+          ]),
           _vm._v(" "),
           _c(
             "table",
             { staticClass: "table table-bordered table-striped table-sm" },
             [
-              _vm._m(2),
+              _vm._m(1),
               _vm._v(" "),
               _c(
                 "tbody",
@@ -39296,44 +39391,6 @@ var staticRenderFns = [
       _vm._v(" "),
       _c("li", { staticClass: "breadcrumb-item active" }, [
         _vm._v("Grupos Permisos")
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "form-group row" }, [
-      _c("div", { staticClass: "col-md-6" }, [
-        _c("div", { staticClass: "input-group" }, [
-          _c(
-            "select",
-            {
-              staticClass: "form-control col-md-3",
-              attrs: { id: "opcion", name: "opcion" }
-            },
-            [_c("option", { attrs: { value: "nombre" } }, [_vm._v("Nombre")])]
-          ),
-          _vm._v(" "),
-          _c("input", {
-            staticClass: "form-control",
-            attrs: {
-              type: "text",
-              id: "texto",
-              name: "texto",
-              placeholder: "Texto a buscar"
-            }
-          }),
-          _vm._v(" "),
-          _c(
-            "button",
-            { staticClass: "btn btn-primary", attrs: { type: "submit" } },
-            [
-              _c("i", { staticClass: "fa fa-search" }),
-              _vm._v(" Buscar\n              ")
-            ]
-          )
-        ])
       ])
     ])
   },

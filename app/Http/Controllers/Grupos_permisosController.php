@@ -20,7 +20,16 @@ class Grupos_permisosController extends Controller
 
     public function index(Request $request)
     {
-        $datos = Grupos_permisos::paginate(2);
+        $npag=2;
+        $buscar=$request->query('buscar','');
+        $criterio=$request->query('criterio','');
+
+        if ($buscar==''){
+            $datos = Grupos_permisos::orderBy('id','desc')->paginate($npag);
+        }else{
+            $datos = Grupos_permisos::where($criterio,'like','%'.$buscar.'%')->orderBy('id','desc')->paginate($npag);
+        }
+
         if ($request->ajax()) {
             return  $datos;
         } else {
