@@ -12,5 +12,11 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('contenido.contenido');
 });
+
+Route::resource('Grupos_permisos', 'Grupos_permisosController');
+
+//Route::get('user/login', 'Grupos_permisosController@api');
+
+
