@@ -2226,6 +2226,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2240,7 +2246,9 @@ __webpack_require__.r(__webpack_exports__);
       error: 0,
       errores: [],
       pag: 0,
-      offset: 3
+      offset: 3,
+      sel: [],
+      selAll: false
     };
   },
   methods: {
@@ -2265,6 +2273,15 @@ __webpack_require__.r(__webpack_exports__);
       var me = this; //me.pag.current_page = page;
 
       me.listar(page, buscar, criterio);
+    },
+    selclick: function selclick() {
+      this.sel = [];
+
+      if (!this.selAll) {
+        for (var i in this.lista) {
+          this.sel.push(this.lista[i].id);
+        }
+      }
     },
     validar: function validar() {
       this.error = 0;
@@ -39056,12 +39073,109 @@ var render = function() {
             "table",
             { staticClass: "table table-bordered table-striped table-sm" },
             [
-              _vm._m(1),
+              _c("thead", [
+                _c("tr", [
+                  _c("th", { attrs: { width: "15" } }, [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.selAll,
+                          expression: "selAll"
+                        }
+                      ],
+                      attrs: {
+                        type: "checkbox",
+                        id: "blankCheckbox",
+                        value: "option1",
+                        "aria-label": "..."
+                      },
+                      domProps: {
+                        checked: Array.isArray(_vm.selAll)
+                          ? _vm._i(_vm.selAll, "option1") > -1
+                          : _vm.selAll
+                      },
+                      on: {
+                        click: function($event) {
+                          return _vm.selclick()
+                        },
+                        change: function($event) {
+                          var $$a = _vm.selAll,
+                            $$el = $event.target,
+                            $$c = $$el.checked ? true : false
+                          if (Array.isArray($$a)) {
+                            var $$v = "option1",
+                              $$i = _vm._i($$a, $$v)
+                            if ($$el.checked) {
+                              $$i < 0 && (_vm.selAll = $$a.concat([$$v]))
+                            } else {
+                              $$i > -1 &&
+                                (_vm.selAll = $$a
+                                  .slice(0, $$i)
+                                  .concat($$a.slice($$i + 1)))
+                            }
+                          } else {
+                            _vm.selAll = $$c
+                          }
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("Nombre")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("Estado")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("Opciones")])
+                ])
+              ]),
               _vm._v(" "),
               _c(
                 "tbody",
                 _vm._l(_vm.lista, function(item) {
                   return _c("tr", { key: item.id }, [
+                    _c("td", [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.sel,
+                            expression: "sel"
+                          }
+                        ],
+                        attrs: { type: "checkbox" },
+                        domProps: {
+                          value: item.id,
+                          checked: Array.isArray(_vm.sel)
+                            ? _vm._i(_vm.sel, item.id) > -1
+                            : _vm.sel
+                        },
+                        on: {
+                          change: function($event) {
+                            var $$a = _vm.sel,
+                              $$el = $event.target,
+                              $$c = $$el.checked ? true : false
+                            if (Array.isArray($$a)) {
+                              var $$v = item.id,
+                                $$i = _vm._i($$a, $$v)
+                              if ($$el.checked) {
+                                $$i < 0 && (_vm.sel = $$a.concat([$$v]))
+                              } else {
+                                $$i > -1 &&
+                                  (_vm.sel = $$a
+                                    .slice(0, $$i)
+                                    .concat($$a.slice($$i + 1)))
+                              }
+                            } else {
+                              _vm.sel = $$c
+                            }
+                          }
+                        }
+                      })
+                    ]),
+                    _vm._v(" "),
                     _c("td", { domProps: { textContent: _vm._s(item.name) } }),
                     _vm._v(" "),
                     _c("td", [
@@ -39391,20 +39505,6 @@ var staticRenderFns = [
       _vm._v(" "),
       _c("li", { staticClass: "breadcrumb-item active" }, [
         _vm._v("Grupos Permisos")
-      ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("thead", [
-      _c("tr", [
-        _c("th", [_vm._v("Nombre")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("Estado")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("Opciones")])
       ])
     ])
   }

@@ -44,6 +44,9 @@
           <table class="table table-bordered table-striped table-sm">
             <thead>
               <tr>
+                <th width=15>
+                    <input class="" type="checkbox" id="blankCheckbox" value="option1" aria-label="..." v-model="selAll" @click="selclick()">
+                </th>
                 <th>Nombre</th>
                 <th>Estado</th>
                 <th>Opciones</th>
@@ -51,6 +54,9 @@
             </thead>
             <tbody>
               <tr v-for="item in lista" :key="item.id">
+                  <td>
+                      <input class="" type="checkbox" :value="item.id" v-model="sel" >
+                  </td>
                 <td v-text="item.name"></td>
                 <td>
                   <div v-if="item.status==1">
@@ -164,7 +170,9 @@ export default {
       error: 0,
       errores: [],
       pag: 0,
-      offset: 3
+      offset: 3,
+      sel: [],
+      selAll: false
     };
   },
   methods: {
@@ -194,6 +202,15 @@ export default {
         let me = this;
         //me.pag.current_page = page;
         me.listar(page,buscar,criterio);
+    },
+    selclick(){
+        this.sel = [];
+        if (!this.selAll) {
+            for (let i in this.lista) {
+                this.sel.push(this.lista[i].id);
+            }
+
+        }
     },
     validar(){
         this.error=0;

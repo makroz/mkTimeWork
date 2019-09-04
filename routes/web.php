@@ -16,3 +16,7 @@ Route::get('/', function () {
 });
 
 Route::resource('Grupos_permisos', 'Grupos_permisosController');
+
+//Route::get('user/login', 'Grupos_permisosController@api');
+
+

@@ -10,16 +10,16 @@
                     <li class="nav-item nav-dropdown">
                         <a class="nav-link nav-dropdown-toggle" href="#"><i class="icon-people"></i> Permisos y Roles</a>
                         <ul class="nav-dropdown-items">
-                            <li @click="menu=1" class="nav-item">
-                                <a class="nav-link" href="#">&nbsp;&nbsp;&nbsp;<i class="icon-bag"></i> Grupo Permisos</a>
+                            <li @click="menu='gruposPermisos'" class="nav-item" :class="[menu == 'gruposPermisos' ? 'bg-secondary' : '']">
+                                <a class="nav-link" href="#">&nbsp;&nbsp;&nbsp;<i class="icon-bag"></i> Grupos Permisos</a>
                             </li>
-                            <li @click="menu=2" class="nav-item">
+                            <li @click="menu='permisos'" class="nav-item" :class="[menu == 'permisos' ? 'bg-secondary' : '']">
                             <a class="nav-link" href="#">&nbsp;&nbsp;&nbsp;<i class="icon-key"></i> Permisos</a>
                             </li>
-                            <li @click="menu=3" class="nav-item">
+                            <li @click="menu='roles'" class="nav-item" :class="[menu == 'roles' ? 'bg-secondary' : '']">
                             <a class="nav-link" href="#">&nbsp;&nbsp;&nbsp;<i class="icon-people"></i> Roles</a>
                             </li>
-                            <li @click="menu=4" class="nav-item">
+                            <li @click="menu='usuarios'" class="nav-item" :class="[menu == 'usuarios' ? 'bg-secondary' : '']">
                             <a class="nav-link" href="#">&nbsp;&nbsp;&nbsp;<i class="icon-user"></i> Usuarios</a>
                             </li>
 

@@ -18,6 +18,11 @@ class Grupos_permisosController extends Controller
         return true;
     }
 
+        public function api(Request $request){
+            $data = ['complete' => true, 'data' => ['algo'], 'message'=>'todo bien aca'];
+            return response()->json($data);
+        }
+
     public function index(Request $request)
     {
         $npag=2;
