@@ -2,8 +2,8 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/makroz/public_html/gfactura
-    - /bin/cp -r * $DEPLOYPATH
+    - /bin/cp -r -f * $DEPLOYPATH
     - cd  $DEPLOYPATH
-    - /bin/mv .env.host .env -f
+    - /bin/mv -f .env.host .env
 
 
