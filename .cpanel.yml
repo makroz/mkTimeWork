@@ -4,7 +4,5 @@ deployment:
     - export DEPLOYPATH=/home/makroz/public_html/gfactura
     - cp -r * $DEPLOYPATH
     - cd $DEPLOYPATH
-    - rm .env
-    - cp .env.host .env
-
-
+    - rm -f $DEPLOYPATH/.env
+    - cp $DEPLOYPATH/.env.host $DEPLOYPATH/.env
