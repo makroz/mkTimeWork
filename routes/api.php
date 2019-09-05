@@ -19,4 +19,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('user/login', 'Grupos_permisosController@api');
-Route::middleware('cors')->post('api/user/login', 'Grupos_permisosController@api');
+Route::middleware('cors:api')->post('api/user/login', 'Grupos_permisosController@api');
