@@ -20,5 +20,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('api/user/login', 'Grupos_permisosController@api');
 Route::post('user/login', 'Grupos_permisosController@api');
-Route::post('api/grupos_permisos/fillTable', 'Grupos_permisosController@index');
+Route::post('grupos_permisos/fillTable', 'Grupos_permisosController@index');
 
