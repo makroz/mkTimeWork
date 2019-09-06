@@ -36,6 +36,10 @@ class Grupos_permisosController extends Controller
         }
 
         if ($request->ajax()) {
+            if ($request->model){
+                $data = ['complete' => true, 'data' => $datos, 'message'=>'listado'];
+                return response()->json($data);
+            }
             return  $datos;
         } else {
             return view('principal');
@@ -65,7 +69,7 @@ class Grupos_permisosController extends Controller
 
     public function edit($id)
     {
-        dd("editar $id");
+        //dd("editar $id");
         $datos = Grupos_permisos::findOrFail($id);
         return $datos;
     }
