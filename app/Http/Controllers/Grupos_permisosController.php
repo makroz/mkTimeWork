@@ -39,7 +39,7 @@ class Grupos_permisosController extends Controller
                         return  $datos;
         } else {
             if ($request->model=='grupos_permisos'){
-                $data = ['complete' => true, 'data' => $datos, 'message'=>'listado'];
+                $data = ['complete' => true, 'data' => $datos->data, 'message'=>'listado'];
                 return response()->json($data);
             }
         }
