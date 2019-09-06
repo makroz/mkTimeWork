@@ -36,13 +36,12 @@ class Grupos_permisosController extends Controller
         }
 
         if ($request->ajax()) {
-            if ($request->model){
+                        return  $datos;
+        } else {
+            if ($request->model=='grupos_permisos'){
                 $data = ['complete' => true, 'data' => $datos, 'message'=>'listado'];
                 return response()->json($data);
             }
-            return  $datos;
-        } else {
-            return "Hola!";
         }
     }
 
