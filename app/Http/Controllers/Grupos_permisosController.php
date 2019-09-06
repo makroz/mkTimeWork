@@ -42,7 +42,7 @@ class Grupos_permisosController extends Controller
             }
             return  $datos;
         } else {
-            return view('principal');
+            return "Hola!";
         }
     }
 
