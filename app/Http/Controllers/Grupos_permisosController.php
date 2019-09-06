@@ -25,7 +25,7 @@ class Grupos_permisosController extends Controller
 
     public function index(Request $request)
     {
-        $npag=2;
+        $npag=1;
         $buscar=$request->query('buscar','');
         $criterio=$request->query('criterio','');
 
@@ -40,7 +40,7 @@ class Grupos_permisosController extends Controller
         } else {
             if ($request->model=='grupos_permisos'){
                 $d=$datos->toArray();
-                $data = ['complete' => true, 'data' => $d['data'], 'message'=>'listado'];
+                $data = ['complete' => true, 'data' => $d['data'], 'message'=>'listado', 'total'=>$d['total']];
                 return response()->json($data);
             }
         }
