@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Grupos_permisos;
 use App\Help;
 use Illuminate\Support\Facades\App;
+use Session;
 
 
 class Grupos_permisosController extends Controller
@@ -25,9 +26,11 @@ class Grupos_permisosController extends Controller
 
     public function index(Request $request)
     {
-        $npag=1;
+
+        $npag=$request->query('per_page',Session::get('per_page', 10));
         $buscar=$request->query('buscar','');
         $criterio=$request->query('criterio','');
+        Session::put('per_page', $npag);
 
         if ($buscar==''){
             $datos = Grupos_permisos::orderBy('id','desc')->paginate($npag);
