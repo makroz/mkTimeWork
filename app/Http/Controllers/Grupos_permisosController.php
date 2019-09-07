@@ -26,16 +26,16 @@ class Grupos_permisosController extends Controller
 
     public function index(Request $request)
     {
-
-        $npag=$request->query('per_page',Session::get('per_page', 10));
+        $page=$request->post('page',$request->post('page',$request->get('page',1)));
+        $npag=$request->post('per_page',Session::get('per_page', 10));
         $buscar=$request->query('buscar','');
         $criterio=$request->query('criterio','');
         Session::put('per_page', $npag);
 
         if ($buscar==''){
-            $datos = Grupos_permisos::orderBy('id','desc')->paginate($npag);
+            $datos = Grupos_permisos::orderBy('id','desc')->paginate($npag, ['*'], 'page', $page);
         }else{
-            $datos = Grupos_permisos::where($criterio,'like','%'.$buscar.'%')->orderBy('id','desc')->paginate($npag);
+            $datos = Grupos_permisos::where($criterio,'like','%'.$buscar.'%')->orderBy('id','desc')->paginate($npag ,['*'], 'page', $page);
         }
 
         if ($request->ajax()) {
