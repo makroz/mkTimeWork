@@ -27,15 +27,20 @@ class Grupos_permisosController extends Controller
     public function index(Request $request)
     {
         $page=$request->post('page',$request->get('page',1));
-        $npag=$request->post('per_page',Session::get('per_page', 10));
+        $perPage=$request->post('per_page',$request->get('per_page',Session::get('per_page', 5)));
+        $sortBy=$request->post('sortBy',$request->get('sortBy',Session::get('sortBy', 'id')));
+        $order=$request->post('ordorder',$request->get('order',Session::get('order', 'desc')));
         $buscar=$request->query('buscar','');
         $criterio=$request->query('criterio','');
-        Session::put('per_page', $npag);
+
+        Session::put('per_page', $perPage);
+        Session::put('sortBy', $sortBy);
+        Session::put('order', $order);
 
         if ($buscar==''){
-            $datos = Grupos_permisos::orderBy('id','desc')->paginate($npag, ['*'], 'page', $page);
+            $datos = Grupos_permisos::orderBy($sortBy,$order)->paginate($perPage, ['*'], 'page', $page);
         }else{
-            $datos = Grupos_permisos::where($criterio,'like','%'.$buscar.'%')->orderBy('id','desc')->paginate($npag ,['*'], 'page', $page);
+            $datos = Grupos_permisos::where($criterio,'like','%'.$buscar.'%')->orderBy($sortBy,$order)->paginate($perPage ,['*'], 'page', $page);
         }
 
         if ($request->ajax()) {
