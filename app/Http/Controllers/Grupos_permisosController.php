@@ -2,65 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Grupos_permisos;
-use App\Help;
-use Illuminate\Support\Facades\App;
 use Session;
-
+use App\Grupos_permisos;
+use App\Mk_helpers\Mk_db;
+use App\Mk_helpers\Mk_forms;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 
 class Grupos_permisosController extends Controller
 {
-
-    public function __construct()
+    public function __construct(Request $request)
     {
-
+        Mk_db::startDbLog(true);
         //dd( "Controler : Grupo Permisos / Accion:".Help::getAction().'::::'.App::environment().'</hr>');
         return true;
     }
 
-        public function api(Request $request){
-            $data = ['complete' => true, 'data' => ['algo'], 'message'=>'todo bien aca'];
-            return response()->json($data);
-        }
-
     public function index(Request $request)
     {
-        $page=$request->post('page',$request->get('page',1));
-        $perPage=$request->post('per_page',$request->get('per_page',Session::get('per_page', 5)));
-        $sortBy=$request->post('sortBy',$request->get('sortBy',Session::get('sortBy', 'id')));
-        $order=$request->post('ordorder',$request->get('order',Session::get('order', 'desc')));
-        $buscar=$request->query('buscar','');
-        $criterio=$request->query('criterio','');
+        $page=Mk_forms::getParam('page', 1);
+        $perPage=Mk_forms::getParam('per_page', 5);
+        $sortBy=Mk_forms::getParam('sortBy', 'id');
+        $order=Mk_forms::getParam('order', 'desc');
+        $buscar=$request->query('buscar', '');
+        $criterio=$request->query('criterio', '');
 
-        Session::put('per_page', $perPage);
-        Session::put('sortBy', $sortBy);
-        Session::put('order', $order);
-
-        if ($buscar==''){
-            $datos = Grupos_permisos::orderBy($sortBy,$order)->paginate($perPage, ['*'], 'page', $page);
-        }else{
-            $datos = Grupos_permisos::where($criterio,'like','%'.$buscar.'%')->orderBy($sortBy,$order)->paginate($perPage ,['*'], 'page', $page);
+        if ($buscar=='') {
+            $datos = Grupos_permisos::orderBy($sortBy, $order)->paginate($perPage, ['*'], 'page', $page);
+        } else {
+            $datos = Grupos_permisos::where($criterio, 'like', '%'.$buscar.'%')->orderBy($sortBy, $order)->paginate($perPage, ['*'], 'page', $page);
         }
 
         if ($request->ajax()) {
-                        return  $datos;
+            return  $datos;
         } else {
             $d=$datos->toArray();
-            if ($request->model=='grupos_permisos'){//omar
-                $data = ['complete' => true, 'data' => $d['data'], 'message'=>'listado', 'total'=>$d['total']];
-            }else{//mariio
-                $data = ['ok' => $d['total'], 'data' => $d['data']];
-            }
-            return response()->json($data);
+            $data = ['ok' => $d['total'], 'data' => $d['data']];
+            return Mk_db::sendData($d['total'], $d['data']);
         }
-    }
-
-    public function create()
-    {
-
-        //$datos = Grupos_permisos::findOrFail($id);
-        return $datos;
     }
 
     public function store(Request $request)
@@ -71,8 +50,7 @@ class Grupos_permisosController extends Controller
         $datos->save();
 
         if (!$request->ajax()) {
-            $data = ['complete' => $datos->id];
-            return response()->json($data);
+            return Mk_db::sendData($datos->id);
         }
     }
 
@@ -84,22 +62,27 @@ class Grupos_permisosController extends Controller
 
     public function edit($id)
     {
-        //dd("editar $id");
         $datos = Grupos_permisos::findOrFail($id);
         return $datos;
     }
 
     public function update(Request $request, $id)
     {
-        if (!$id){
+        if (!$id) {
             $id=$request->id;
         }
-        $datos = Grupos_permisos::findOrFail($id);
-        $datos->name = $request->name;
-        $datos->save();
+
+        //$datos = Grupos_permisos::findOrFail($id);
+        //$datos->name = $request->name;
+        //$datos->save();
+
+        $r=Grupos_permisos::where('id', '=', $id)
+        ->update([
+        'name' => $request->name,
+        ]);
+
         if (!$request->ajax()) {
-            $data = ['complete' => $datos->id];
-            return response()->json($data);
+            return Mk_db::sendData($r);
         }
     }
 
@@ -107,21 +90,20 @@ class Grupos_permisosController extends Controller
     {
         // TODO: Hacer el borrado de acuerdo si tiene una relacion o no
         $datos = Grupos_permisos::findOrFail($id);
-        $datos->status = ($datos->status==1) ? 0 : 1 ;
+        $datos->status = 0;
         $datos->save();
     }
 
     public function destroyapi(Request $request)
     {
-            $id=$request->id;
-
-        $datos = Grupos_permisos::findOrFail($id);
-        $datos->status = ($datos->status==1) ? 0 : 1 ;
-        $datos->save();
+        // TODO: Hacer el borrado de acuerdo si tiene una relacion o no
+        $id=explode(',', $request->id);
+        $r=Grupos_permisos::wherein('id', $id)
+        ->update([
+        'status' => 0,
+        ]);
         if (!$request->ajax()) {
-            $data = ['complete' => $datos->id];
-            return response()->json($data);
+            return Mk_db::sendData($r);
         }
     }
-
 }
