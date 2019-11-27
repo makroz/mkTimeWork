@@ -26,11 +26,26 @@ class Grupos_permisosController extends Controller
         $order=Mk_forms::getParam('order', 'desc');
         $buscar=$request->query('buscar', '');
         $criterio=$request->query('criterio', '');
+        $buscarA=Mk_forms::getParam('buscarA', '');
 
-        if ($buscar=='') {
-            $datos = Grupos_permisos::orderBy($sortBy, $order)->paginate($perPage, ['*'], 'page', $page);
+        
+        $where=\App\Mk_helpers\Mk_db::getWhere($buscarA);
+
+
+        
+        \App\Mk_helpers\Mk_debug::msgApi('Buscando:'.$where);
+        //TODO: aqui me quede
+        $consulta=Grupos_permisos::orderBy($sortBy, $order);
+
+        //TODO: convertir esta busqueda bsica igual que la vanzada cambiando el componente en el front
+        if ($buscar!='') {
+            $consulta = $consulta->where($criterio, 'like', '%'.$buscar.'%');
+        }
+
+        if ($perPage>0) {
+            $datos = $consulta->paginate($perPage, ['*'], 'page', $page);
         } else {
-            $datos = Grupos_permisos::where($criterio, 'like', '%'.$buscar.'%')->orderBy($sortBy, $order)->paginate($perPage, ['*'], 'page', $page);
+            $datos = $consulta->paginate(1000, ['*'], 'page', $page);
         }
 
         if ($request->ajax()) {
@@ -90,7 +105,7 @@ class Grupos_permisosController extends Controller
     {
         // TODO: Hacer el borrado de acuerdo si tiene una relacion o no
         $datos = Grupos_permisos::findOrFail($id);
-        $datos->status = 0;
+        $datos->status = 'X';
         $datos->save();
     }
 
@@ -100,7 +115,7 @@ class Grupos_permisosController extends Controller
         $id=explode(',', $request->id);
         $r=Grupos_permisos::wherein('id', $id)
         ->update([
-        'status' => 0,
+        'status' => 'X',
         ]);
         if (!$request->ajax()) {
             return Mk_db::sendData($r);
