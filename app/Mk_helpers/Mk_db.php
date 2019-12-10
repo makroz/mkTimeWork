@@ -46,6 +46,11 @@ class Mk_db
             $buscarA=json_decode($buscarA, true);
             $union='';
             foreach ($buscarA as $key => $value) {
+                $value['campo']=DB::connection()->getPdo()->quote($value['campo']);
+                $value['campo']=substr($value['campo'], 1, -1);
+
+                $value['criterio']=DB::connection()->getPdo()->quote($value['criterio']);
+                $value['criterio']=substr($value['criterio'], 1, -1);
                 if ($value['criterio']!='') {
                     switch ($union) {
                         case 'and':
@@ -58,6 +63,7 @@ class Mk_db
                             break;
                     }
                     $where.='(';
+
                     switch ($value['cond']) {
                         case  0: //igual
                         case 20:
@@ -91,22 +97,22 @@ class Mk_db
                             break;
 
                         case 11: //contiene
-                            $where.=$value['campo']." LIKE ('%".$value['criterio']."%')'";
+                            $where.=$value['campo']." LIKE ('%".$value['criterio']."%')";
                             break;
                         case 12: //no contiene
-                            $where.=$value['campo']." NOT LIKE ('%".$value['criterio']."%')'";
+                            $where.=$value['campo']." NOT LIKE ('%".$value['criterio']."%')";
                             break;
 
                         case 13: //empieza con
-                            $where.=$value['campo']." LIKE ('%".$value['criterio']."')'";
+                            $where.=$value['campo']." LIKE ('%".$value['criterio']."')";
                             break;
 
                         case 14: //no empiezo comn
-                            $where.=$value['campo']." NOT LIKE ('%".$value['criterio']."')'";
+                            $where.=$value['campo']." NOT LIKE ('%".$value['criterio']."')";
                             break;
 
                         case 15: //termina por
-                            $where.=$value['campo']." LIKE ('".$value['criterio']."%')'";
+                            $where.=$value['campo']." LIKE ('".$value['criterio']."%')";
                             break;
 
                         case 16: //no termina por

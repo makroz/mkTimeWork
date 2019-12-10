@@ -20,19 +20,21 @@ class Grupos_permisosController extends Controller
 
     public function index(Request $request)
     {
-        $page=Mk_forms::getParam('page', 1);
-        $perPage=Mk_forms::getParam('per_page', 5);
-        $sortBy=Mk_forms::getParam('sortBy', 'id');
-        $order=Mk_forms::getParam('order', 'desc');
-        $buscar=$request->query('buscar', '');
-        $criterio=$request->query('criterio', '');
-        $buscarA=Mk_forms::getParam('buscarA', '');
+        $token='tokens';
+        $page=Mk_forms::getParam('page', 1, $token);
+        $perPage=Mk_forms::getParam('per_page', 5, $token);
+        $sortBy=Mk_forms::getParam('sortBy', 'id', $token);
+        $order=Mk_forms::getParam('order', 'desc', $token);
+        //$buscar=$request->query('buscar', '');
+        //$criterio=$request->query('criterio', '');
+        $buscar='';
+        $buscarA=Mk_forms::getParam('buscar', '', $token);
 
-        
+
         $where=\App\Mk_helpers\Mk_db::getWhere($buscarA);
 
 
-        
+
         \App\Mk_helpers\Mk_debug::msgApi('Buscando:'.$where);
         //TODO: aqui me quede
         $consulta=Grupos_permisos::orderBy($sortBy, $order);
@@ -40,13 +42,17 @@ class Grupos_permisosController extends Controller
         //TODO: convertir esta busqueda bsica igual que la vanzada cambiando el componente en el front
         if ($buscar!='') {
             $consulta = $consulta->where($criterio, 'like', '%'.$buscar.'%');
+        } else {
+            if ($where!='') {
+                $consulta = $consulta->whereRaw($where);
+            }
         }
 
-        if ($perPage>0) {
-            $datos = $consulta->paginate($perPage, ['*'], 'page', $page);
-        } else {
-            $datos = $consulta->paginate(1000, ['*'], 'page', $page);
+        if ($perPage<0) {
+            $perPage=1000;
         }
+
+        $datos = $consulta->paginate($perPage, ['*'], 'page', $page);
 
         if ($request->ajax()) {
             return  $datos;
