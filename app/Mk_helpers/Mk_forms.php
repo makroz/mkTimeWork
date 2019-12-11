@@ -10,6 +10,7 @@ class Mk_forms
 {
     public static $ses;
     public static $counter;
+    public static $pathtoken='..'.DIRECTORY_SEPARATOR.'storage'.DIRECTORY_SEPARATOR.'framework'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR;
     public function __construct()
     {
         $this->counter = 0;
@@ -22,7 +23,7 @@ class Mk_forms
         if ($token=='') {
             return Session::get($name, $default);
         } else {
-            $filename = $token.'_token'."_otro";
+            $filename = self::$pathtoken.$token.'.tok';
 
             if (file_exists($filename)) {
                 $contents = json_decode(file_get_contents($filename), true);
@@ -44,7 +45,7 @@ class Mk_forms
         if ($token=='') {
             Session::put($name, $value);
         } else {
-            $filename = $token.'_token'."_otro";
+            $filename = self::$pathtoken.$token.'.tok';
 
             if (file_exists($filename)) {
                 $contents = json_decode(file_get_contents($filename), true);
