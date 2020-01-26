@@ -16,9 +16,10 @@ Route::get('/', function () {
 });
 
 Route::resource('Grupos_permisos', 'Grupos_permisosController');
+Route::resource('Log_netpizza', 'Log_netpizzaController');
+Route::get('Log_netpizza', 'Log_netpizzaController@index');
+
 
 //Route::get('user/login', 'Grupos_permisosController@api');
 //Route::post('user/login', 'Grupos_permisosController@api');
 //Route::get('api/user/login', 'Grupos_permisosController@api');
-
-
