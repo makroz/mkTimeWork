@@ -11,6 +11,7 @@ class Grupos_permisosController extends Controller
     private $__modelo='\App\Grupos_permisos';
     public function __construct(Request $request)
     {
+        $this->__init($request);
         return true;
     }
 }

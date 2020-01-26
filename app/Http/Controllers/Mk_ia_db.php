@@ -9,10 +9,8 @@ use Illuminate\Http\Request;
 //TODO: hacer persitente los datos de getparam al actualizar opcional
 trait Mk_ia_db
 {
-    public function __construct(Request $request)
+    public function __init(Request $request)
     {
-        parent::__construct($request);
-
         Mk_db::startDbLog(true);
         //dd( "Controler : Grupo Permisos / Accion:".Help::getAction().'::::'.App::environment().'</hr>');
         return true;
