@@ -6,6 +6,8 @@ use \App\Mk_helpers\Mk_forms;
 use \App\Mk_helpers\Mk_debug;
 use Illuminate\Http\Request;
 
+const _maxRowTable=1000;
+
 //TODO: hacer persitente los datos de getparam al actualizar opcional
 trait Mk_ia_db
 {
@@ -24,27 +26,21 @@ trait Mk_ia_db
         $order=Mk_forms::getParam('order', 'desc', $token);
         //$buscar=$request->query('buscar', '');
         //$criterio=$request->query('criterio', '');
-        $buscar='';
         $buscarA=Mk_forms::getParam('buscar', '', $token);
 
 
         $where=Mk_db::getWhere($buscarA);
 
         Mk_debug::msgApi('Buscando:'.$where);
-        //TODO: aqui me quede
+
         $consulta=$this->__modelo::orderBy($sortBy, $order);
 
-        //TODO: convertir esta busqueda bsica igual que la vanzada cambiando el componente en el front
-        if ($buscar!='') {
-            $consulta = $consulta->where($criterio, 'like', '%'.$buscar.'%');
-        } else {
-            if ($where!='') {
-                $consulta = $consulta->whereRaw($where);
-            }
+        if ($where!='') {
+            $consulta = $consulta->whereRaw($where);
         }
 
         if ($perPage<0) {
-            $perPage=1000;//TODO: usar constante unica de configuracion ya sea de laravel..
+            $perPage=_maxRowTable;
         }
 
         $datos = $consulta->paginate($perPage, ['*'], 'page', $page);
@@ -92,6 +88,7 @@ trait Mk_ia_db
         //$datos->name = $request->name;
         //$datos->save();
 
+        //TODO: revisar errorres si es que no existe el registro;
         $r=$this->__modelo::where('id', '=', $id)
         ->update([
         'name' => $request->name,
