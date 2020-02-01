@@ -62,7 +62,6 @@ class Mk_forms
             file_put_contents($filename, json_encode($contents));
             self::$counter=self::$counter+1;
             if (self::$counter==1) {
-                self::$ses = new Prueba('test');
             }
         }
         return true;
@@ -85,19 +84,5 @@ class Mk_forms
     public function __destruct()
     {
         Mk_debug::msgApi('Desconstructor form!!!:'.$this->counter);
-    }
-}
-
-class Prueba
-{
-    public $id;
-    public function __construct($id)
-    {
-        $this->id = $id;
-        Mk_debug::msgApi('constructor:');
-    }
-    public function __destruct()
-    {
-        Mk_debug::msgApi('Desconstructor!!!');
     }
 }

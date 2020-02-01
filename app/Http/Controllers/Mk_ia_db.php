@@ -19,15 +19,13 @@ trait Mk_ia_db
     }
     public function index(Request $request)
     {
+        //TODO: revisar si hay que devolver con los borrados virtuales o no
         $token='tokens';//TODO: hacer queel token sea automatico se recupere de cada usuario que se conecte unico, validar el token con ip etc.
         $page=Mk_forms::getParam('page', 1, $token);
         $perPage=Mk_forms::getParam('per_page', 5, $token);
         $sortBy=Mk_forms::getParam('sortBy', 'id', $token);
         $order=Mk_forms::getParam('order', 'desc', $token);
-        //$buscar=$request->query('buscar', '');
-        //$criterio=$request->query('criterio', '');
         $buscarA=Mk_forms::getParam('buscar', '', $token);
-
 
         $where=Mk_db::getWhere($buscarA);
 
@@ -84,18 +82,19 @@ trait Mk_ia_db
             $id=$request->id;
         }
 
-        //$datos = Grupos_permisos::findOrFail($id);
-        //$datos->name = $request->name;
-        //$datos->save();
-
-        //TODO: revisar errorres si es que no existe el registro;
         $r=$this->__modelo::where('id', '=', $id)
         ->update([
         'name' => $request->name,
+        'status' => 1
         ]);
+        $msg='';
 
         if (!$request->ajax()) {
-            return Mk_db::sendData($r);
+            if ($r==0) {
+                $r=-1;
+                $msg='Registro ya NO EXISTE';
+            }
+            return Mk_db::sendData($r, null, $msg);
         }
     }
 
@@ -107,8 +106,14 @@ trait Mk_ia_db
         ->update([
         'status' => 'X',
         ]);
+        $msg='';
         if (!$request->ajax()) {
-            return Mk_db::sendData($r);
+            if ($r==0) {
+                $r=-1;
+                $msg='Registro ya NO EXISTE';
+            }
+
+            return Mk_db::sendData($r, null, $msg);
         }
     }
 
@@ -120,8 +125,14 @@ trait Mk_ia_db
         ->update([
         'status' => 'X',
         ]);
+        $msg='';
         if (!$request->ajax()) {
-            return Mk_db::sendData($r);
+            if ($r==0) {
+                $r=-1;
+                $msg='Registro ya NO EXISTE';
+            }
+
+            return Mk_db::sendData($r, null, $msg);
         }
     }
 }
