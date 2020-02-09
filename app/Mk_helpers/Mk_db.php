@@ -19,7 +19,7 @@ class Mk_db
         return true;
     }
 
-    public static function sendData($ok, $data=null, $msg='')
+    public static function sendData($ok, $data=null, $msg='', $_debug=true)
     {
         $res = ['ok' => $ok];
         if ($data!==null) {
@@ -28,7 +28,8 @@ class Mk_db
         if ($msg!='') {
             $res['msg']=$msg;
         }
-        if (Mk_debug::isDebug()) {
+
+        if ((Mk_debug::isDebug())&&($_debug)) {
             $res['_queryLog']=DB::getQueryLog();
             if (Mk_debug::msgApi()>0) {
                 $res['_debugMsg']=Mk_debug::getMsgApi();

@@ -70,13 +70,15 @@ class Mk_forms
     {
         $name1=$name;
         $clase=Request::route()->getAction();
-        $clase=$clase['as'];
+        $clase=explode('.', $clase['as']);
+        $clase=$clase[0];
+
         $name=$clase.'_'.$name;
         $param=Request::input($name1, self::getSession($name, $default, $token));
         Mk_debug::msgApi($name.':'. $param);
 
         self::setSession($name, $param, $token);
-        Mk_debug::msgApi($name.'2:'. self::getSession($name, 'x', $token));
+        //Mk_debug::msgApi($name.'2:'. self::getSession($name, 'x', $token));
         //Mk_debug::msgApi($clase.'_'.$name.'2:'. $_SESSION[$clase.'_'.$name]);
         return $param;
     }
