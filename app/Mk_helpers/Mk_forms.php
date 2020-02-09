@@ -70,7 +70,10 @@ class Mk_forms
     {
         $name1=$name;
         $clase=Request::route()->getAction();
-        $clase=explode('.', $clase['as']);
+        //print_r($clase);
+        $clase=explode($clase['namespace'].'\\', $clase['controller']);
+        $clase=explode('Controller@', $clase[1]);
+
         $clase=$clase[0];
 
         $name=$clase.'_'.$name;

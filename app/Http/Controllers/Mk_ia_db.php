@@ -102,12 +102,12 @@ trait Mk_ia_db
 
     public function destroy($id)
     {
-        // TODO: Hacer el borrado de acuerdo si tiene una relacion o no
         $id=$request->id;
         $r=$this->__modelo::wherein('id', $id)
-        ->update([
-        'status' => 'X',
-        ]);
+        ->delete();
+        //->update([
+        //'status' => 'X',
+        //]);
         $msg='';
         if (!$request->ajax()) {
             if ($r==0) {
@@ -122,12 +122,12 @@ trait Mk_ia_db
 
     public function destroyapi(Request $request)
     {
-        // TODO: Hacer el borrado de acuerdo si tiene una relacion o no
         $id=explode(',', $request->id);
         $r=$this->__modelo::wherein('id', $id)
-        ->update([
-        'status' => 'X',
-        ]);
+        ->delete();
+        //->update([
+        //'status' => 'X',
+        //]);
         $msg='';
         if (!$request->ajax()) {
             if ($r==0) {

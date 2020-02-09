@@ -28,13 +28,10 @@ class Cors_Headers
 
             if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
                 header("Access-Control-Allow-Headers:        {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
-
             }
             header("Access-Control-Max-Age", "3600");
             header("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me");
-
         }
         return $next($request);
-
     }
 }
