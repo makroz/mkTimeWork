@@ -8,10 +8,8 @@ use App\Help;
 use Illuminate\Support\Facades\App;
 use Session;
 
-
 class PermisosController extends Controller
 {
-
     public function __construct()
     {
 
@@ -19,29 +17,30 @@ class PermisosController extends Controller
         return true;
     }
 
-        public function api(Request $request){
-            $data = ['complete' => true, 'data' => ['algo'], 'message'=>'todo bien aca'];
-            return response()->json($data);
-        }
+    public function api(Request $request)
+    {
+        $data = ['complete' => true, 'data' => ['algo'], 'message'=>'todo bien aca'];
+        return response()->json($data);
+    }
 
     public function index(Request $request)
     {
-        $page=$request->post('page',$request->post('page',$request->get('page',1)));
-        $npag=$request->post('per_page',Session::get('per_page', 10));
-        $buscar=$request->query('buscar','');
-        $criterio=$request->query('criterio','');
+        $page=$request->post('page', $request->post('page', $request->get('page', 1)));
+        $npag=$request->post('per_page', Session::get('per_page', 10));
+        $buscar=$request->query('buscar', '');
+        $criterio=$request->query('criterio', '');
         Session::put('per_page', $npag);
 
-        if ($buscar==''){
-            $datos = Permisos::orderBy('id','desc')->paginate($npag, ['*'], 'page', $page);
-        }else{
-            $datos = Permisos::where($criterio,'like','%'.$buscar.'%')->orderBy('id','desc')->paginate($npag ,['*'], 'page', $page);
+        if ($buscar=='') {
+            $datos = Permisos::orderBy('id', 'desc')->paginate($npag, ['*'], 'page', $page);
+        } else {
+            $datos = Permisos::where($criterio, 'like', '%'.$buscar.'%')->orderBy('id', 'desc')->paginate($npag, ['*'], 'page', $page);
         }
 
         if ($request->ajax()) {
-                        return  $datos;
+            return  $datos;
         } else {
-            if ($request->model=='permisos'){
+            if ($request->model=='permisos') {
                 $d=$datos->toArray();
                 $data = ['complete' => true, 'data' => $d['data'], 'message'=>'listado', 'total'=>$d['total']];
                 return response()->json($data);
@@ -85,7 +84,7 @@ class PermisosController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!$id){
+        if (!$id) {
             $id=$request->id;
         }
         $datos = Permisos::findOrFail($id);
@@ -100,8 +99,7 @@ class PermisosController extends Controller
 
     public function destroy($id)
     {
-        // TODO: Hacer el borrado de acuerdo si tiene una relacion o no
-        if (!$id){
+        if (!$id) {
             $id=$request->id;
         }
 

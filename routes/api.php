@@ -19,6 +19,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::resource('Grupos_permisos', 'Grupos_permisosController');
-
-Route::post('Grupos_permisos/', 'Grupos_permisosController@index');
-Route::post('Grupos_permisos/delete', 'Grupos_permisosController@destroyapi');
+Route::get('Grupos_permisos/', 'Grupos_permisosController@index');
+Route::post('Grupos_permisos/delete', 'Grupos_permisosController@destroy');
+Route::post('Grupos_permisos/setStatus', 'Grupos_permisosController@setStatus');

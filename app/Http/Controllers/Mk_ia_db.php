@@ -13,13 +13,12 @@ trait Mk_ia_db
 {
     public function __init(Request $request)
     {
-        Mk_db::startDbLog(true);
-        //dd( "Controler : Grupo Permisos / Accion:".Help::getAction().'::::'.App::environment().'</hr>');
+        Mk_debug::__init();
+        Mk_db::startDbLog();
         return true;
     }
     public function index(Request $request, $_debug=true)
     {
-        //TODO: revisar si hay que devolver con los borrados virtuales o no
         $token='tokens';//TODO: hacer queel token sea automatico se recupere de cada usuario que se conecte unico, validar el token con ip etc.
         $page=Mk_forms::getParam('page', 1, $token);
         $perPage=Mk_forms::getParam('per_page', 5, $token);
@@ -28,8 +27,6 @@ trait Mk_ia_db
         $buscarA=Mk_forms::getParam('buscar', '', $token);
 
         $where=Mk_db::getWhere($buscarA);
-
-        Mk_debug::msgApi('Buscando:'.$where);
 
         $consulta=$this->__modelo::orderBy($sortBy, $order);
 
@@ -61,7 +58,6 @@ trait Mk_ia_db
 
         if (!$request->ajax()) {
             return Mk_db::sendData($datos->id, ($this->index($request, false))->original);
-            //return Mk_db::sendData($datos->id);
         }
     }
 
@@ -86,7 +82,6 @@ trait Mk_ia_db
         $r=$this->__modelo::where('id', '=', $id)
         ->update([
         'name' => $request->name,
-        'status' => 1
         ]);
         $msg='';
 
@@ -96,31 +91,10 @@ trait Mk_ia_db
                 $msg='Registro ya NO EXISTE';
             }
             return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
-            //return Mk_db::sendData($r, null, $msg);
         }
     }
 
-    public function destroy($id)
-    {
-        $id=$request->id;
-        $r=$this->__modelo::wherein('id', $id)
-        ->delete();
-        //->update([
-        //'status' => 'X',
-        //]);
-        $msg='';
-        if (!$request->ajax()) {
-            if ($r==0) {
-                $r=-1;
-                $msg='Registro ya NO EXISTE';
-            }
-
-            return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
-            //return Mk_db::sendData($r, null, $msg);
-        }
-    }
-
-    public function destroyapi(Request $request)
+    public function destroy(Request $request)
     {
         $id=explode(',', $request->id);
         $r=$this->__modelo::wherein('id', $id)
@@ -128,6 +102,8 @@ trait Mk_ia_db
         //->update([
         //'status' => 'X',
         //]);
+
+        //TODO: hacer el sofdelete a las relaciones tambien
         $msg='';
         if (!$request->ajax()) {
             if ($r==0) {
@@ -136,7 +112,24 @@ trait Mk_ia_db
             }
 
             return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
-            //return Mk_db::sendData($r, null, $msg);
+        }
+    }
+
+    public function setStatus(Request $request)
+    {
+        $newStatus=$request->status;
+        $id=explode(',', $request->id);
+        $r=$this->__modelo::wherein('id', $id)
+        ->update([
+        'status' => $newStatus,
+        ]);
+        $msg='';
+        if (!$request->ajax()) {
+            if ($r==0) {
+                $r=-1;
+                $msg='Registro ya NO EXISTE';
+            }
+            return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
         }
     }
 }

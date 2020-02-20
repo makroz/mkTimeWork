@@ -9,12 +9,10 @@ class Mk_db
 {
     public static function startDbLog($force=false)
     {
-        if ($force) {
-            Mk_debug::init(true);//TODO:debe ir en env
-        }
-
-        if (Mk_debug::isDebug()) {
+        Mk_debug::setDebugDb(env('IA_DEBUG_DB', 'false'));
+        if ((Mk_debug::isDebugDb())or($force)) {
             DB::connection()->enableQueryLog();
+            Mk_debug::setDebugDb(true);
         }
         return true;
     }
@@ -30,7 +28,9 @@ class Mk_db
         }
 
         if ((Mk_debug::isDebug())&&($_debug)) {
-            $res['_queryLog']=DB::getQueryLog();
+            if (Mk_debug::isDebugDb()) {
+                $res['_queryLog']=DB::getQueryLog();
+            }
             if (Mk_debug::msgApi()>0) {
                 $res['_debugMsg']=Mk_debug::getMsgApi();
             }

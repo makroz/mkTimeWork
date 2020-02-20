@@ -78,7 +78,7 @@ class Mk_forms
 
         $name=$clase.'_'.$name;
         $param=Request::input($name1, self::getSession($name, $default, $token));
-        Mk_debug::msgApi($name.':'. $param);
+        //Mk_debug::msgApi($name.':'. $param);
 
         self::setSession($name, $param, $token);
         //Mk_debug::msgApi($name.'2:'. self::getSession($name, 'x', $token));

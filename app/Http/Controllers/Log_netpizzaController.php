@@ -207,7 +207,6 @@ class Log_netpizzaController extends Controller
 
     public function destroy($id)
     {
-        // TODO: Hacer el borrado de acuerdo si tiene una relacion o no
         $datos = Grupos_permisos::findOrFail($id);
         $datos->status = 'X';
         $datos->save();
@@ -215,7 +214,6 @@ class Log_netpizzaController extends Controller
 
     public function destroyapi(Request $request)
     {
-        // TODO: Hacer el borrado de acuerdo si tiene una relacion o no
         $id=explode(',', $request->id);
         $r=Grupos_permisos::wherein('id', $id)
         ->update([
