@@ -2,18 +2,21 @@
 namespace App\Http\Controllers;
 
 use \App\Mk_helpers\Mk_db;
-use \App\Mk_helpers\Mk_forms;
-use \App\Mk_helpers\Mk_debug;
 use Illuminate\Http\Request;
+use \App\Mk_helpers\Mk_debug;
+use \App\Mk_helpers\Mk_forms;
+use Illuminate\Support\Facades\DB;
 
 const _maxRowTable=1000;
+const _errorNoExiste=-1;
+const _errorAlGrabar=-10;
+
 
 //TODO: hacer persitente los datos de getparam al actualizar opcional
 trait Mk_ia_db
 {
     public function __init(Request $request)
     {
-        Mk_debug::__init();
         Mk_db::startDbLog();
         return true;
     }
@@ -38,7 +41,8 @@ trait Mk_ia_db
             $perPage=_maxRowTable;
         }
 
-        $datos = $consulta->paginate($perPage, ['*'], 'page', $page);
+        $modelo=new $this->__modelo();
+        $datos = $consulta->paginate($perPage, array_merge([$modelo->getKeyName()], $modelo->getFill()), 'page', $page);
 
         if ($request->ajax()) {
             return  $datos;
@@ -51,13 +55,25 @@ trait Mk_ia_db
 
     public function store(Request $request)
     {
+        DB::beginTransaction();
         $datos = new $this->__modelo();
-        $datos->name = $request->name;
+
+        $datos->fill($request->all());
         $datos->status = '1';
-        $datos->save();
+
+        if ($datos->save()) {
+            DB::commit();
+            $r=$datos->id;
+            $msg='';
+        } else {
+            DB::rollback();
+            $r=-10;
+            $msg=_errorAlGrabar;
+        }
+
 
         if (!$request->ajax()) {
-            return Mk_db::sendData($datos->id, ($this->index($request, false))->original);
+            return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
         }
     }
 
@@ -78,18 +94,21 @@ trait Mk_ia_db
         if (!$id) {
             $id=$request->id;
         }
+        DB::beginTransaction();
 
         $r=$this->__modelo::where('id', '=', $id)
-        ->update([
-        'name' => $request->name,
-        ]);
+        ->update(
+            $request->all()
+        );
         $msg='';
 
         if (!$request->ajax()) {
             if ($r==0) {
-                $r=-1;
+                $r=_errorNoExiste;
                 $msg='Registro ya NO EXISTE';
+                DB::rollback();
             }
+            DB::commit();
             return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
         }
     }
@@ -97,20 +116,20 @@ trait Mk_ia_db
     public function destroy(Request $request)
     {
         $id=explode(',', $request->id);
+        DB::beginTransaction();
+
         $r=$this->__modelo::wherein('id', $id)
         ->delete();
-        //->update([
-        //'status' => 'X',
-        //]);
 
         //TODO: hacer el sofdelete a las relaciones tambien
         $msg='';
         if (!$request->ajax()) {
             if ($r==0) {
-                $r=-1;
+                $r=_errorNoExiste;
                 $msg='Registro ya NO EXISTE';
+                DB::rollback();
             }
-
+            DB::commit();
             return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
         }
     }
@@ -119,6 +138,8 @@ trait Mk_ia_db
     {
         $newStatus=$request->status;
         $id=explode(',', $request->id);
+        DB::beginTransaction();
+
         $r=$this->__modelo::wherein('id', $id)
         ->update([
         'status' => $newStatus,
@@ -126,9 +147,11 @@ trait Mk_ia_db
         $msg='';
         if (!$request->ajax()) {
             if ($r==0) {
-                $r=-1;
+                $r=_errorNoExiste;
                 $msg='Registro ya NO EXISTE';
+                DB::rollback();
             }
+            DB::commit();
             return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
         }
     }

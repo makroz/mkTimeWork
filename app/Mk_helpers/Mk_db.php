@@ -9,7 +9,6 @@ class Mk_db
 {
     public static function startDbLog($force=false)
     {
-        Mk_debug::setDebugDb(env('IA_DEBUG_DB', 'false'));
         if ((Mk_debug::isDebugDb())or($force)) {
             DB::connection()->enableQueryLog();
             Mk_debug::setDebugDb(true);
