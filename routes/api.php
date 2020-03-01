@@ -31,3 +31,23 @@ Route::group(['prefix' => 'Grupos'], function () {
     Route::post('/delete', 'GruposController@destroy');
     Route::post('/setStatus', 'GruposController@setStatus');
 });
+Route::resource('Permisos', 'PermisosController');
+Route::group(['prefix' => 'Permisos'], function () {
+    Route::get('/', 'PermisosController@index');
+    Route::post('/delete', 'PermisosController@destroy');
+    Route::post('/setStatus', 'PermisosController@setStatus');
+});
+
+Route::resource('Roles', 'RolesController');
+Route::group(['prefix' => 'Roles'], function () {
+    Route::get('/', 'RolesController@index');
+    Route::post('/delete', 'RolesController@destroy');
+    Route::post('/setStatus', 'RolesController@setStatus');
+});
+
+Route::resource('Grupos_permisos', 'Grupos_permisosController');
+Route::group(['prefix' => 'GPermisos'], function () {
+    Route::get('/', 'Grupos_permisosController@index');
+    Route::post('/delete', 'Grupos_permisosController@destroy');
+    Route::post('/setStatus', 'Grupos_permisosController@setStatus');
+});

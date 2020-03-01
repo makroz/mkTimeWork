@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Permisos extends Model
+class Roles extends Model
 {
     use \Illuminate\Database\Eloquent\SoftDeletes;
     protected $dates = ['deleted_at'];
