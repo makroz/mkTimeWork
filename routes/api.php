@@ -30,6 +30,7 @@ Route::group(['prefix' => 'Grupos'], function () {
     Route::get('/', 'GruposController@index');
     Route::post('/delete', 'GruposController@destroy');
     Route::post('/setStatus', 'GruposController@setStatus');
+    Route::get('/permisos/{grupos_id}', 'GruposController@permisos');
 });
 Route::resource('Permisos', 'PermisosController');
 Route::group(['prefix' => 'Permisos'], function () {

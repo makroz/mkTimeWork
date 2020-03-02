@@ -42,8 +42,11 @@ trait Mk_ia_db
         }
 
         $modelo=new $this->__modelo();
-        $datos = $consulta->paginate($perPage, array_merge([$modelo->getKeyName()], $modelo->getFill()), 'page', $page);
+        if (isset($modelo->_pivotes)) {
+            $consulta = $consulta->with($modelo->_pivotes);
+        }
 
+        $datos = $consulta->paginate($perPage, array_merge([$modelo->getKeyName()], $modelo->getFill()), 'page', $page);
         if ($request->ajax()) {
             return  $datos;
         } else {
@@ -59,7 +62,7 @@ trait Mk_ia_db
         $datos = new $this->__modelo();
 
         $datos->fill($request->all());
-        $datos->status = '1';
+        //$datos->status = '1';
 
         if ($datos->save()) {
             DB::commit();
