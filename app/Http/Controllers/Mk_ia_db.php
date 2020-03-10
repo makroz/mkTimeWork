@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 const _maxRowTable=1000;
 const _errorNoExiste=-1;
 const _errorAlGrabar=-10;
+const _errorAlGrabar2=-11;
+
 
 
 //TODO: hacer persitente los datos de getparam al actualizar opcional
@@ -56,24 +58,49 @@ trait Mk_ia_db
         }
     }
 
+    public function beforeDel($id, $modelo)
+    {
+    }
+
+    public function afterDel($id, $modelo, $error=0)
+    {
+    }
+
+    public function beforeSave(Request $request, $modelo, $action=1)
+    {
+    }
+
+    public function afterSave(Request $request, $modelo, $error=0, $action=1)
+    {
+    }
+
     public function store(Request $request)
     {
         DB::beginTransaction();
-        $datos = new $this->__modelo();
+        try {
+            $datos = new $this->__modelo();
 
-        $datos->fill($request->all());
-        //$datos->status = '1';
+            $this->beforeSave($request, $datos, 1);
+            $datos->fill($request->except('paramsExtra'));
+            //$datos->status = '1';
+            $r=$datos->save();
 
-        if ($datos->save()) {
-            DB::commit();
-            $r=$datos->id;
-            $msg='';
-        } else {
+
+            if ($r) {
+                $r=$datos->id;
+                $msg='';
+                $this->afterSave($request, $datos, $r, 1);
+                DB::commit();
+            } else {
+                DB::rollback();
+                $r=_errorAlGrabar;
+                $msg='Error Al Grabar';
+            }
+        } catch (\Throwable $th) {
             DB::rollback();
-            $r=-10;
-            $msg=_errorAlGrabar;
+            $r=_errorAlGrabar2;
+            $msg='Error mientras se Grababa: '.$th->getMessage();
         }
-
 
         if (!$request->ajax()) {
             return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
@@ -98,20 +125,31 @@ trait Mk_ia_db
             $id=$request->id;
         }
         DB::beginTransaction();
+        try {
+            $datos = new $this->__modelo();
 
-        $r=$this->__modelo::where('id', '=', $id)
-        ->update(
-            $request->all()
-        );
-        $msg='';
+            $this->beforeSave($request, $datos, 2);
 
-        if (!$request->ajax()) {
+            $r=$datos->where('id', '=', $id)
+             ->update(
+                 $request->except('paramsExtra')
+             );
+            $msg='';
+
             if ($r==0) {
                 $r=_errorNoExiste;
                 $msg='Registro ya NO EXISTE';
                 DB::rollback();
+            } else {
+                $this->afterSave($request, $datos, $r, 2);
+                DB::commit();
             }
-            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollback();
+            $r=_errorAlGrabar2;
+            $msg='Error mientras se Actualizaba: '.$th->getMessage();
+        }
+        if (!$request->ajax()) {
             return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
         }
     }
@@ -120,19 +158,29 @@ trait Mk_ia_db
     {
         $id=explode(',', $request->id);
         DB::beginTransaction();
+        try {
+            $datos = new $this->__modelo();
+            $this->beforeDel($id, $datos);
+            $r=$datos->wherein('id', $id)
+            ->delete();
+            //TODO: hacer el sofdelete a las relaciones tambien
+            $msg='';
 
-        $r=$this->__modelo::wherein('id', $id)
-        ->delete();
-
-        //TODO: hacer el sofdelete a las relaciones tambien
-        $msg='';
-        if (!$request->ajax()) {
             if ($r==0) {
                 $r=_errorNoExiste;
                 $msg='Registro ya NO EXISTE';
                 DB::rollback();
+            } else {
+                $this->afterDel($id, $datos, $r);
+                DB::commit();
             }
-            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollback();
+            $r=_errorAlGrabar2;
+            $msg='Error mientras se Eliminaba: '.$th->getMessage();
+        }
+
+        if (!$request->ajax()) {
             return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
         }
     }
