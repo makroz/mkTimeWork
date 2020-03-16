@@ -38,7 +38,7 @@ class GruposController extends Controller
                 $modelo->id=$request->id;
                 $modelo->permisos()->detach();
             }
-            foreach ($request->paramsExtra as $key => $value) {
+            foreach ($request->paramsExtra['permisos'] as $key => $value) {
                 if ($value['valor']>0) {
                     $modelo->permisos()->attach($value['id'], ['valor' => $value['valor']]);
                 }

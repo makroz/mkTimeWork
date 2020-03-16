@@ -129,7 +129,7 @@ trait Mk_ia_db
         } catch (\Throwable $th) {
             DB::rollback();
             $r=_errorAlGrabar2;
-            $msg='Error mientras se Grababa: '.$th->getMessage();
+            $msg="Error mientras se Grababa: \n".$th->getMessage(). "\n ************* \n ".$th;
         }
 
         if (!$request->ajax()) {
