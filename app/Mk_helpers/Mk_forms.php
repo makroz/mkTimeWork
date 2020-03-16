@@ -31,7 +31,7 @@ class Mk_forms
                 return $default;
             }
 
-            if ((array_key_exists($name, $contents))) {
+            if ((is_array($contents))and(array_key_exists($name, $contents))) {
                 return $contents[$name];
             } else {
                 return $default;
@@ -52,7 +52,10 @@ class Mk_forms
             } else {
                 $contents=array();
             }
-            if ((array_key_exists($name, $contents))) {
+            if (!is_array($contents)) {
+                $contents=array();
+            }
+            if (array_key_exists($name, $contents)) {
                 $contents[$name]=$value;
             } else {
                 $contents = array_merge(array($name=>$value), $contents);

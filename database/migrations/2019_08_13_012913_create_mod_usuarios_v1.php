@@ -21,7 +21,7 @@ class CreateModUsuariosV1 extends Migration
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
             $table->smallIncrements('id');
-            $table->string('name', 100);
+            $table->string('name', 20);
             $table->string('descrip', 200)->nullable();
             $table->char('status', 1)->default('1');
             $table->timestamps();
@@ -33,7 +33,9 @@ class CreateModUsuariosV1 extends Migration
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
             $table->increments('id');
+            $table->string('slug', 20)->unique();
             $table->string('name', 100);
+
             $table->string('descrip', 200)->nullable();
 
             $table->char('status', 1)->default('1');
@@ -60,15 +62,16 @@ class CreateModUsuariosV1 extends Migration
         Schema::dropIfExists($nTable);
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
-            $table->smallIncrements('id');
-            $table->smallInteger('valor')->default(0);
+//            $table->smallIncrements('id');
+            $table->unsignedTinyInteger('valor')->default(0);
             $table->char('status', 1)->default('1');
-            $table->timestamps();
-            $table->softDeletes();
+//            $table->timestamps();
+//            $table->softDeletes();
             $table->integer('permisos_id')->unsigned();
             $table->foreign('permisos_id')->references('id')->on('permisos')->onDelete('cascade')->onUpdate('cascade');
             $table->smallInteger('grupos_id')->unsigned();
             $table->foreign('grupos_id')->references('id')->on('grupos')->onDelete('cascade')->onUpdate('cascade');
+//            $table>unique(['grupos_id', 'permisos_id']);
         });
 
 
@@ -78,7 +81,7 @@ class CreateModUsuariosV1 extends Migration
             $table->engine ='InnoDB';
             $table->increments('id');
             $table->string('name', 100);
-            $table->string('email', 100);
+            $table->string('email', 100)>unique();
             $table->string('pass', 30);
             $table->char('activo', 1)->default('0');
             $table->rememberToken();
@@ -95,8 +98,8 @@ class CreateModUsuariosV1 extends Migration
         Schema::dropIfExists($nTable);
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
-            $table->increments('id');
-            $table->smallInteger('valor')->default(0);
+            //    $table->increments('id');
+            $table->unsignedTinyInteger('valor')->default(0);
             $table->integer('usuarios_id')->unsigned();
             $table->foreign('usuarios_id')->references('id')->on('usuarios')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('permisos_id')->unsigned();
@@ -107,7 +110,7 @@ class CreateModUsuariosV1 extends Migration
         Schema::dropIfExists($nTable);
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
-            $table->increments('id');
+//            $table->increments('id');
             $table->integer('usuarios_id')->unsigned();
             $table->foreign('usuarios_id')->references('id')->on('usuarios')->onDelete('cascade')->onUpdate('cascade');
             $table->smallInteger('grupos_id')->unsigned();

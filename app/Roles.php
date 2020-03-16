@@ -6,13 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Roles extends Model
 {
-    use \Illuminate\Database\Eloquent\SoftDeletes;
-    protected $dates = ['deleted_at'];
-
+    use Http\Controllers\Mk_ia_model;
+//
     protected $fillable = ['name', 'descrip','status'];
-
-    public function getFill()
-    {
-        return $this->fillable;
-    }
+    protected $attributes = [
+        'status' => 1,
+    ];
 }

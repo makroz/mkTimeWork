@@ -6,13 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Permisos extends Model
 {
-    use \Illuminate\Database\Eloquent\SoftDeletes;
-    protected $dates = ['deleted_at'];
-
-    protected $fillable = ['name', 'descrip','status'];
-
-    public function getFill()
-    {
-        return $this->fillable;
-    }
+    use Http\Controllers\Mk_ia_model;
+//
+    protected $fillable = ['name','slug', 'descrip','status'];
+    protected $attributes = [
+        'status' => 1,
+    ];
 }

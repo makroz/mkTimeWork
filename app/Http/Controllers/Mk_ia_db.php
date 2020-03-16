@@ -30,8 +30,22 @@ trait Mk_ia_db
         $sortBy=Mk_forms::getParam('sortBy', 'id', $token);
         $order=Mk_forms::getParam('order', 'desc', $token);
         $buscarA=Mk_forms::getParam('buscar', '', $token);
+        $cols=$request->cols;
+        $disabled=$request->disabled;
+
+
+        $modelo=new $this->__modelo();
+        $table=$modelo->getTable();
 
         $where=Mk_db::getWhere($buscarA);
+
+        if ($disabled==1) {
+            if ($where != '') {
+                $where ='('. $where. ")and({$table}.status<>'0')";
+            } else {
+                $where ="({$table}.status<>'0')";
+            }
+        }
 
         $consulta=$this->__modelo::orderBy($sortBy, $order);
 
@@ -43,16 +57,32 @@ trait Mk_ia_db
             $perPage=_maxRowTable;
         }
 
-        $modelo=new $this->__modelo();
-        if (isset($modelo->_pivotes)) {
-            $consulta = $consulta->with($modelo->_pivotes);
+
+        if (isset($modelo->_relaciones)) {
+            $consulta = $consulta->with($modelo->_relaciones);
         }
 
-        $datos = $consulta->paginate($perPage, array_merge([$modelo->getKeyName()], $modelo->getFill()), 'page', $page);
+        if ($cols!='') {
+            $cols=explode(',', $cols);
+            $cols=array_merge([$modelo->getKeyName()], $cols);
+        } else {
+            $cols=array_merge([$modelo->getKeyName()], $modelo->getFill());
+        }
+
+        //$consulta= $consulta->makeHidden(['grupos.pivot']);
+
+        $datos = $consulta->paginate($perPage, $cols, 'page', $page);
+
+        // if ($modelo->hidden) {
+        //     $total=$datos['total'];
+        //     $datos=$datos->makeHidden('datagrupos.pivot');
+        //     $datos['total']=$total;
+        // }
+
         if ($request->ajax()) {
             return  $datos;
         } else {
-            $d=$datos->toArray();
+            $d=$datos->toArray($modelo->getHidden());
             $data = ['ok' => $d['total'], 'data' => $d['data']];
             return Mk_db::sendData($d['total'], $d['data'], '', $_debug);
         }
