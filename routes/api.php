@@ -52,4 +52,5 @@ Route::group(['prefix' => 'Usuarios'], function () {
     Route::post('/delete', 'UsuariosController@destroy');
     Route::post('/setStatus', 'UsuariosController@setStatus');
     Route::post('/permisos/{grupos_id}', 'UsuariosController@permisos');
+    Route::post('/permisosGrupos/{usuarios_id}', 'UsuariosController@permisosGrupos');
 });

@@ -64,11 +64,12 @@ class UsuariosController extends Controller
             return  $datos;
         } else {
             $d=$datos->toArray();
-            return \App\Mk_helpers\Mk_db::sendData(count($d), $d, $this->permisosGrupos($request, $usuarios_id, false)->original);
+            return \App\Mk_helpers\Mk_db::sendData(count($d), $d, $this->permisosGrupos($request, 0, false)->original);
+            // TODO: ver de eliminar el ->original de la senData
         }
     }
 
-    public function permisosGrupos(Request $request, $usuarios_id, $debug=true)
+    public function permisosGrupos(Request $request, $usuarios_id=0, $debug=true)
     {
         $grupos_id=$request->grupos;
         if (!is_array($grupos_id)) {
@@ -76,10 +77,10 @@ class UsuariosController extends Controller
         }
 
         $permisos = new \App\Permisos();
-        $datos= $permisos->select(\Illuminate\Support\Facades\DB::raw('BIT_OR(grupos_permisos.valor) as valor'), 'permisos.id')->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
+        $datos= $permisos->select('permisos.id', \Illuminate\Support\Facades\DB::raw('BIT_OR(grupos_permisos.valor) as valor'))->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
             $join->on('permisos.id', '=', 'permisos_id')
                  ->wherein('grupos_id', $grupos_id);
-        })->groupBy('grupos_id', 'id')->orderBy('permisos.name')->get();
+        })->groupBy('permisos.id')->orderBy('permisos.name')->get();
 
         if ($request->ajax()) {
             return  $datos;
