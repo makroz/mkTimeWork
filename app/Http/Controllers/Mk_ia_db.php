@@ -14,7 +14,7 @@ const _errorAlGrabar2=-11;
 
 
 
-//TODO: hacer persitente los datos de getparam al actualizar opcional
+
 trait Mk_ia_db
 {
     public function __init(Request $request)
