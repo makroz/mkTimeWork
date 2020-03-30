@@ -11,6 +11,7 @@ const _maxRowTable=1000;
 const _errorNoExiste=-1;
 const _errorAlGrabar=-10;
 const _errorAlGrabar2=-11;
+const _errorLogin=-1000;
 
 
 
@@ -133,7 +134,7 @@ trait Mk_ia_db
         }
 
         if (!$request->ajax()) {
-            return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
+            return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
     }
 
@@ -180,7 +181,7 @@ trait Mk_ia_db
             $msg='Error mientras se Actualizaba: '.$th->getMessage();
         }
         if (!$request->ajax()) {
-            return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
+            return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
     }
 
@@ -211,7 +212,7 @@ trait Mk_ia_db
         }
 
         if (!$request->ajax()) {
-            return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
+            return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
     }
 
@@ -233,7 +234,7 @@ trait Mk_ia_db
                 DB::rollback();
             }
             DB::commit();
-            return Mk_db::sendData($r, ($this->index($request, false))->original, $msg);
+            return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
     }
 }

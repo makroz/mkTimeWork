@@ -12,7 +12,7 @@ class Usuarios extends Model
         'status' => 1,
     ];
 
-    protected $hidden = ['pivot'];
+    protected $hidden = ['pass'];
 
 
     public $_relaciones = ['grupos:grupos.id'];
@@ -23,16 +23,12 @@ class Usuarios extends Model
     {
         return $this->belongsToMany('App\Permisos', 'usuarios_permisos')
         ->withPivot('valor');
-        // Si el nombre de la tabla es diferente a lo predeterminado o el ID de la tabla tiene otro nombre.
-        //return $this->belongsToMany('App\Role', 'user_roles', 'user_id', 'role_id');
     }
 
     public function grupos()
     {
         return $this->belongsToMany('App\Grupos', 'usuarios_grupos')
         ->withPivot('grupos_id');
-        // Si el nombre de la tabla es diferente a lo predeterminado o el ID de la tabla tiene otro nombre.
-        //return $this->belongsToMany('App\Role', 'user_roles', 'user_id', 'role_id');
     }
 
     public function roles()

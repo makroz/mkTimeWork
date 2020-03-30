@@ -19,6 +19,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
+Route::post('login', 'UsuariosController@login');
+Route::post('logout', 'UsuariosController@logout');
+
+
 Route::resource('Grupos_permisos', 'Grupos_permisosController');
 
 Route::get('Grupos_permisos/', 'Grupos_permisosController@index');

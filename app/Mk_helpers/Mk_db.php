@@ -35,7 +35,7 @@ class Mk_db
             }
         }
 
-        return (response()->json($res));
+        return (response()->json($res))->original;
     }
 
     public static function getWhere($buscarA='')

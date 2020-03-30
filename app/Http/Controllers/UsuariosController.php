@@ -55,7 +55,7 @@ class UsuariosController extends Controller
     public function permisos(Request $request, $usuarios_id)
     {
         $permisos = new \App\Permisos();
-        $datos= $permisos->select('permisos.id', 'permisos.name', 'usuarios_permisos.valor', 'usuarios_permisos.permisos_id')->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
+        $datos= $permisos->select('permisos.id', 'permisos.name', 'usuarios_permisos.valor', 'permisos.slug')->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
             $join->on('permisos.id', '=', 'permisos_id')
                  ->where('usuarios_id', '=', $usuarios_id);
         })->orderBy('permisos.name')->get();
@@ -64,8 +64,7 @@ class UsuariosController extends Controller
             return  $datos;
         } else {
             $d=$datos->toArray();
-            return \App\Mk_helpers\Mk_db::sendData(count($d), $d, $this->permisosGrupos($request, 0, false)->original);
-            // TODO: ver de eliminar el ->original de la senData
+            return \App\Mk_helpers\Mk_db::sendData(count($d), $d, $this->permisosGrupos($request, 0, false));
         }
     }
 
@@ -88,5 +87,43 @@ class UsuariosController extends Controller
             $d=$datos->toArray();
             return \App\Mk_helpers\Mk_db::sendData(count($d), $d, '', $debug);
         }
+    }
+
+    public function permisosGruposMix($usuarios_id=0, $grupos_id=[], $debug=true)
+    {
+        $permisos = new \App\Permisos();
+        $datos= $permisos->select('permisos.slug', \Illuminate\Support\Facades\DB::raw('BIT_OR(grupos_permisos.valor|usuarios_permisos.valor) as valor'))->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
+            $join->on('permisos.id', '=', 'usuarios_permisos.permisos_id')
+                 ->where('usuarios_id', '=', $usuarios_id);
+        })->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
+            $join->on('permisos.id', '=', 'grupos_permisos.permisos_id')
+                 ->wherein('grupos_id', $grupos_id);
+        })->groupBy('permisos.slug')->orderBy('permisos.name')->get();
+
+        $d=$datos->toArray();
+        return \App\Mk_helpers\Mk_db::sendData(count($d), $d, '', $debug);
+    }
+
+    public function login(Request $request)
+    {
+        $modelo=new $this->__modelo();
+        $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])->where('email', $request->username)->where('pass', $request->password)
+        ->leftJoin('roles', 'roles.id', '=', 'roles_id')->with('grupos')->first();
+
+
+        $msg='';
+        if (!$datos) {
+            $r=_errorLogin;
+            $msg='Login Erroneo';
+            $d=[];
+        } else {
+            $d=$datos->toArray();
+            $r=$d['id'];
+            //print_r($d);
+            $permisos=$this->permisosGruposMix($d['id'], $d['gruposid'], false);
+            $d['permisos']=$permisos['data'];
+        }
+
+        return \App\Mk_helpers\Mk_db::sendData($r, $d, $msg);
     }
 }
