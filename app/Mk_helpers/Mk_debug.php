@@ -22,11 +22,13 @@ class Mk_debug
             if ($r==0) {
                 return false;
             }
+            return $r;
         }
-        {
-        }
-        self::$msgApi[]=$msg;
-        return $r+1;
+        $call=debug_backtrace(2,2);
+        $call='   >> ['.basename($call[0]['file']).':'.$call[0]['line'].']';
+        self::$msgApi[]=$msg.$call;
+
+        return true;
     }
 
     public static function getMsgApi()

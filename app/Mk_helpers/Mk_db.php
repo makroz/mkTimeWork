@@ -2,6 +2,8 @@
 
 namespace App\Mk_helpers;
 
+use App\Mk_helpers\Mk_auth\Mk_auth;
+
 use App\Mk_helpers\Mk_debug;
 use Illuminate\Support\Facades\DB;
 
@@ -25,6 +27,14 @@ class Mk_db
         if ($msg!='') {
             $res['msg']=$msg;
         }
+        $token=(Mk_auth::get())->getToken();
+
+        if ($_debug) {
+            if ($token!=null) {
+                (Mk_auth::get())->setToken(null);
+                $res['_sid_']=$token;
+            }
+        }
 
         if ((Mk_debug::isDebug())&&($_debug)) {
             if (Mk_debug::isDebugDb()) {
@@ -34,7 +44,13 @@ class Mk_db
                 $res['_debugMsg']=Mk_debug::getMsgApi();
             }
         }
-
+        if (((Mk_auth::get())->getBlockData())){
+            (Mk_auth::get())->blockData(false);
+            $res['ok']=-1001;
+            unset($res['data']);
+            unset($res['_queryLog']);
+            $res['msg']='No Autenticado';
+        }
         return (response()->json($res))->original;
     }
 

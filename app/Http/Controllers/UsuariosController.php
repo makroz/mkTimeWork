@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\App;
 class UsuariosController extends Controller
 {
     use Mk_ia_db;
-
+    public $_autorizar='Usuarios';
 
     private $__modelo='\App\Usuarios';
 
@@ -110,19 +110,25 @@ class UsuariosController extends Controller
         $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])->where('email', $request->username)->where('pass', $request->password)
         ->leftJoin('roles', 'roles.id', '=', 'roles_id')->with('grupos')->first();
 
-
+        $Auth=\App\Mk_helpers\Mk_auth\Mk_auth::get();
         $msg='';
         if (!$datos) {
             $r=_errorLogin;
             $msg='Login Erroneo';
             $d=[];
+            $user=null;
         } else {
             $d=$datos->toArray();
             $r=$d['id'];
+            $user=new \stdClass();
+            $user->id=$d['id'];
+            $user->name=$d['name'];
+            $user->rol=$d['rol'];
             //print_r($d);
             $permisos=$this->permisosGruposMix($d['id'], $d['gruposid'], false);
             $d['permisos']=$permisos['data'];
         }
+        $Auth->setUser($user);
 
         return \App\Mk_helpers\Mk_db::sendData($r, $d, $msg);
     }

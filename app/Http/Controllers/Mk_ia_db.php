@@ -2,7 +2,8 @@
 namespace App\Http\Controllers;
 
 use \App\Mk_helpers\Mk_db;
-use Illuminate\Http\Request;
+use \App\Mk_helpers\Mk_auth\Mk_auth;
+use \Illuminate\Http\Request;
 use \App\Mk_helpers\Mk_debug;
 use \App\Mk_helpers\Mk_forms;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,7 @@ const _errorNoExiste=-1;
 const _errorAlGrabar=-10;
 const _errorAlGrabar2=-11;
 const _errorLogin=-1000;
+const _errorNoAutenticado=-1001;
 
 
 
@@ -20,12 +22,21 @@ trait Mk_ia_db
 {
     public function __init(Request $request)
     {
+
+        if (isset($this->_autorizar)){
+            $Auth=Mk_auth::getInstance();
+            if (!$Auth->isLogin()){
+                $Auth->blockData(true);
+                //TODO: ver lamanera que tampoco ejecute ninguna consulta a la BD
+            }
+        }
         Mk_db::startDbLog();
         return true;
     }
     public function index(Request $request, $_debug=true)
     {
-        $token='tokens';//TODO: hacer queel token sea automatico se recupere de cada usuario que se conecte unico, validar el token con ip etc.
+        $token=Mk_auth::get()->getToken();
+        Mk_debug::msgApi('AQUI :'.$token);
         $page=Mk_forms::getParam('page', 1, $token);
         $perPage=Mk_forms::getParam('per_page', 5, $token);
         $sortBy=Mk_forms::getParam('sortBy', 'id', $token);

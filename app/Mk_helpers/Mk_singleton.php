@@ -1,4 +1,7 @@
-trait Singleton
+<?php
+namespace App\Mk_helpers;
+
+trait Mk_singleton
 {
     private static $instance;
 
@@ -7,7 +10,7 @@ trait Singleton
         if (is_null(self::$instance)) {
             self::$instance = new self();
         }
-    
+
         return self::$instance;
     }
 }
