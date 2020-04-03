@@ -30,7 +30,7 @@ class Mk_db
         $token=(Mk_auth::get())->getToken();
 
         if ($_debug) {
-            if ($token!=null) {
+            if (!empty($token)) {
                 (Mk_auth::get())->setToken(null);
                 $res['_sid_']=$token;
             }
@@ -49,7 +49,7 @@ class Mk_db
             $res['ok']=-1001;
             unset($res['data']);
             unset($res['_queryLog']);
-            $res['msg']='No Autenticado';
+            $res['msg']=(Mk_auth::get())->getMsgError();
         }
         return (response()->json($res))->original;
     }

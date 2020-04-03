@@ -5,6 +5,7 @@ namespace App\Mk_helpers;
 use Request;
 use Session;
 use App\Mk_helpers\Mk_debug;
+use App\Mk_helpers\Mk_auth\Mk_auth;
 
 class Mk_forms
 {
@@ -42,6 +43,7 @@ class Mk_forms
     //TODO:debe hacer unasola lectura del archivo tokem al ikniciar y uno al finalizar
     public static function setSession($name, $value='', $token='')
     {
+        $token=Mk_auth::get()->getToken(true);
         if ($token=='') {
             Session::put($name, $value);
         } else {

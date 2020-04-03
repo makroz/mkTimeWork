@@ -15,7 +15,7 @@ class Auth implements IAuth
         if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
             return null;
         }
-        return $token=$_SERVER['HTTP_AUTHORIZATION'].'0';
+        return $token=$_SERVER['HTTP_AUTHORIZATION'];
 
     }
     public function autenticar($usuario)
@@ -42,20 +42,18 @@ class Auth implements IAuth
 
         $token=$this->getToken();
         if ($token==null) {
-            //throw new \Exception('No esta autenticado');
-            return false;
+            throw new \Exception('No esta autenticado');
+            //return false;
         }
 //        $token=$_SERVER['HTTP_AUTHORIZATION'];
-
         $decode = JWT::decode(
             $token,
             __SECRET_KEY__,
             $this->encrypt
         );
-
         if ($decode->aud !== Mk_auth::tokenPorCliente()) {
-            //throw new \Exception("No esta autenticado");
-            return false;
+            throw new \Exception("No esta autenticado");
+            //return false;
         }
         return true;
     }

@@ -28,6 +28,7 @@ trait Mk_ia_db
             if (!$Auth->isLogin()){
                 $Auth->blockData(true);
                 //TODO: ver lamanera que tampoco ejecute ninguna consulta a la BD
+                //TODO: ver si es mas eficiente que sea un middleware
             }
         }
         Mk_db::startDbLog();

@@ -6,6 +6,7 @@ namespace App\Mk_helpers\Mk_auth;
 class Mk_auth
 {
     private $token = null;
+    private $msgError = null;
     private $user=null;
     private $tipo='token';
     private $secret='sssawdsd8ws.6@';
@@ -44,7 +45,7 @@ class Mk_auth
     }
     public function __init()
     {
-        $this->setToken($this->getToken());
+        $this->setToken($this->getToken(true));
         return true;
     }
 
@@ -66,21 +67,34 @@ class Mk_auth
     public function setToken($token='')
     {
         $this->token=$token;
+
     }
 
-    public function getToken()
+    public function getToken($force=false)
     {
-        return $this->token;
+        $token=$this->token;
+        // if ((empty($token))&&($force)){
+        //         $token=date('ymd.').rand();
+        //         $this->token=$token;
+        // }
+        return $token;
     }
 
     public function isLogin()
     {
+
         try {
             return $this->auth->estaAutenticado();
         } catch (\Throwable $th) {
+            $this->msgError=$th->getMessage().' >>'.$th->getFile().':'.$th->getLine();
             return false;
         }
 
+    }
+
+    public function getMsgError()
+    {
+        return $this->msgError;
     }
 
     public static function tokenPorCliente() {
