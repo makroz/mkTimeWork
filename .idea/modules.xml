@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/gfactura.iml" filepath="$PROJECT_DIR$/.idea/gfactura.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../gfactura-front/.idea/gfactura-front.iml" filepath="$PROJECT_DIR$/../gfactura-front/.idea/gfactura-front.iml" />
     </modules>
   </component>
 </project>

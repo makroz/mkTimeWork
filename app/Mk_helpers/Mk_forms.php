@@ -19,8 +19,9 @@ class Mk_forms
         Mk_debug::msgApi('constructor form:');
     }
 
-    public static function getSession($name, $default='', $token='')
+    public static function getSession($name, $default='')
     {
+        $token=Mk_auth::get()->getTokenCoockie();
         if ($token=='') {
             return Session::get($name, $default);
         } else {
@@ -41,9 +42,9 @@ class Mk_forms
     }
 
     //TODO:debe hacer unasola lectura del archivo tokem al ikniciar y uno al finalizar
-    public static function setSession($name, $value='', $token='')
+    public static function setSession($name, $value='')
     {
-        $token=Mk_auth::get()->getToken(true);
+        $token=Mk_auth::get()->getTokenCoockie();
         if ($token=='') {
             Session::put($name, $value);
         } else {
@@ -71,23 +72,17 @@ class Mk_forms
         }
         return true;
     }
-    public static function getParam($name, $default='', $token='')
+    public static function getParam($name, $default='')
     {
         $name1=$name;
         $clase=Request::route()->getAction();
-        //print_r($clase);
         $clase=explode($clase['namespace'].'\\', $clase['controller']);
         $clase=explode('Controller@', $clase[1]);
-
         $clase=$clase[0];
-
         $name=$clase.'_'.$name;
-        $param=Request::input($name1, self::getSession($name, $default, $token));
-        //Mk_debug::msgApi($name.':'. $param);
-
-        self::setSession($name, $param, $token);
-        //Mk_debug::msgApi($name.'2:'. self::getSession($name, 'x', $token));
-        //Mk_debug::msgApi($clase.'_'.$name.'2:'. $_SESSION[$clase.'_'.$name]);
+        $param=Request::input($name1, self::getSession($name, $default));
+        //Mk_debug::msgApi(self::getSession($name, $default));
+        self::setSession($name, $param);
         return $param;
     }
 

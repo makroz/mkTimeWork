@@ -25,8 +25,9 @@ class Mk_debug
             return $r;
         }
         $call=debug_backtrace(2,2);
-        $call='   >> ['.basename($call[0]['file']).':'.$call[0]['line'].']';
-        self::$msgApi[]=$msg.$call;
+        //$call='   >> ['.basename($call[0]['file']).':'.$call[0]['line'].']';
+        $call=date('His').rand(1,100).':'.basename($call[0]['file']).':'.$call[0]['line'];
+        self::$msgApi[$call]=$msg;
 
         return true;
     }

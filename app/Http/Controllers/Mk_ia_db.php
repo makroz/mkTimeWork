@@ -36,17 +36,15 @@ trait Mk_ia_db
     }
     public function index(Request $request, $_debug=true)
     {
-        $token=Mk_auth::get()->getToken();
-        Mk_debug::msgApi('AQUI :'.$token);
-        $page=Mk_forms::getParam('page', 1, $token);
-        $perPage=Mk_forms::getParam('per_page', 5, $token);
-        $sortBy=Mk_forms::getParam('sortBy', 'id', $token);
-        $order=Mk_forms::getParam('order', 'desc', $token);
-        $buscarA=Mk_forms::getParam('buscar', '', $token);
+        $page=Mk_forms::getParam('page', 1);
+        $perPage=Mk_forms::getParam('per_page', 5);
+        $sortBy=Mk_forms::getParam('sortBy', 'id');
+        $order=Mk_forms::getParam('order', 'desc');
+        $buscarA=Mk_forms::getParam('buscar', '');
         $cols=$request->cols;
         $disabled=$request->disabled;
 
-
+        \App\Mk_helpers\Mk_auth\Mk_auth::get()->canAccess();
         $modelo=new $this->__modelo();
         $table=$modelo->getTable();
 

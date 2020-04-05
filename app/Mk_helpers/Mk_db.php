@@ -27,11 +27,12 @@ class Mk_db
         if ($msg!='') {
             $res['msg']=$msg;
         }
-        $token=(Mk_auth::get())->getToken();
+        $token=Mk_auth::get()->getNewToken();
 
         if ($_debug) {
             if (!empty($token)) {
-                (Mk_auth::get())->setToken(null);
+                MK_debug::msgApi($token);
+                //(Mk_auth::get())->setToken(null);
                 $res['_sid_']=$token;
             }
         }

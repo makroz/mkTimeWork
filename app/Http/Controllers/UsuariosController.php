@@ -8,13 +8,14 @@ use Illuminate\Support\Facades\App;
 class UsuariosController extends Controller
 {
     use Mk_ia_db;
-    public $_autorizar='Usuarios';
+    //public $_autorizar='Usuarios';
 
     private $__modelo='\App\Usuarios';
 
     public function __construct(Request $request)
     {
         $this->__init($request);
+
         return true;
     }
 
@@ -89,47 +90,21 @@ class UsuariosController extends Controller
         }
     }
 
-    public function permisosGruposMix($usuarios_id=0, $grupos_id=[], $debug=true)
-    {
-        $permisos = new \App\Permisos();
-        $datos= $permisos->select('permisos.slug', \Illuminate\Support\Facades\DB::raw('BIT_OR(grupos_permisos.valor|usuarios_permisos.valor) as valor'))->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
-            $join->on('permisos.id', '=', 'usuarios_permisos.permisos_id')
-                 ->where('usuarios_id', '=', $usuarios_id);
-        })->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
-            $join->on('permisos.id', '=', 'grupos_permisos.permisos_id')
-                 ->wherein('grupos_id', $grupos_id);
-        })->groupBy('permisos.slug')->orderBy('permisos.name')->get();
-
-        $d=$datos->toArray();
-        return \App\Mk_helpers\Mk_db::sendData(count($d), $d, '', $debug);
-    }
 
     public function login(Request $request)
     {
-        $modelo=new $this->__modelo();
-        $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])->where('email', $request->username)->where('pass', $request->password)
-        ->leftJoin('roles', 'roles.id', '=', 'roles_id')->with('grupos')->first();
 
         $Auth=\App\Mk_helpers\Mk_auth\Mk_auth::get();
         $msg='';
-        if (!$datos) {
+        $user=$Auth->login( $request->username, $request->password);
+        if (empty($user)) {
             $r=_errorLogin;
             $msg='Login Erroneo';
-            $d=[];
-            $user=null;
+            $user=[];
         } else {
-            $d=$datos->toArray();
-            $r=$d['id'];
-            $user=new \stdClass();
-            $user->id=$d['id'];
-            $user->name=$d['name'];
-            $user->rol=$d['rol'];
+            $r=$user['id'];
             //print_r($d);
-            $permisos=$this->permisosGruposMix($d['id'], $d['gruposid'], false);
-            $d['permisos']=$permisos['data'];
         }
-        $Auth->setUser($user);
-
-        return \App\Mk_helpers\Mk_db::sendData($r, $d, $msg);
+        return \App\Mk_helpers\Mk_db::sendData($r, $user, $msg);
     }
 }
