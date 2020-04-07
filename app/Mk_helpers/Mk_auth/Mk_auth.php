@@ -8,13 +8,16 @@ class Mk_auth
 {
     private $newToken = false;
     private $msgError = null;
+    private $codeError=-1000;
     private $user=null;
+    private $_access=false;
     private $tipo='token';
     private $secret='sssawdsd8ws.6@';
     private $auth;
     private $blockData=false;
     private $coockie='c_sid';
     private $__modelo='\App\Usuarios';
+    private $timeCache=240;
 
     use \App\Mk_helpers\Mk_singleton;
 
@@ -23,6 +26,10 @@ class Mk_auth
         //$this->model = new $modelo();
         define('__AUTH__', $this->tipo);
         define('__SECRET_KEY__', $this->secret);
+        define('__AUTH_LEER__', 1);
+        define('__AUTH_EDITAR__', 2);
+        define('__AUTH_CREAR__', 4);
+        define('__AUTH_BORRAR__', 8);
 
         $this->auth  = FactoryAuth::getInstance();
         if (empty($user)) {
@@ -65,7 +72,8 @@ class Mk_auth
                 $userToken->$value=$user[$value];
             }
             $userToken->name=$user['name'];
-            $userToken->rol=$user['rol'];
+            //$userToken->rol=$user['rol'];
+            Cache::put('user',$user,$this->timeCache);
             $this->setToken($this->auth->autenticar($userToken));
         }
 
@@ -84,7 +92,7 @@ class Mk_auth
     public function getTokenCoockie(){
         $token=$this->getToken();
         if (empty($token)){
-            $token=$_COOKIE[$this->coockie];
+            @$token=$_COOKIE[$this->coockie];
             if (empty($token)) {
                 $token=md5(date('ymd.').rand());
             }
@@ -114,23 +122,39 @@ class Mk_auth
         try {
             return $this->auth->estaAutenticado();
         } catch (\Throwable $th) {
-            $this->msgError=$th->getMessage().' >>'.$th->getFile().':'.$th->getLine();
-            return false;
+            Mk_debug::msgApi('No Logueado: '.$th->getMessage().' >>'.$th->getFile().':'.$th->getLine());
+            return $this->setError(-1001,'No Logueado');
         }
 
     }
 
+    public function checkLogin()
+    {
+
+        if (!$this->isLogin()) {
+            $this->detener(-1001,'No Logueado');
+        }
+        return true;
+    }
 
     public function permisosGruposMix($usuarios_id=0, $grupos_id=[], $debug=true)
     {
         $permisos = new \App\Permisos();
-        $datos= $permisos->select('permisos.slug', \Illuminate\Support\Facades\DB::raw('BIT_OR(grupos_permisos.valor|usuarios_permisos.valor) as valor'))->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
-            $join->on('permisos.id', '=', 'usuarios_permisos.permisos_id')
-                 ->where('usuarios_id', '=', $usuarios_id);
-        })->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
-            $join->on('permisos.id', '=', 'grupos_permisos.permisos_id')
-                 ->wherein('grupos_id', $grupos_id);
-        })->groupBy('permisos.slug')->orderBy('permisos.name')->get();
+        if (!empty($grupos_id)){
+            $datos= $permisos->select('permisos.slug', \Illuminate\Support\Facades\DB::raw('BIT_OR(grupos_permisos.valor|usuarios_permisos.valor) as valor'))->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
+                $join->on('permisos.id', '=', 'usuarios_permisos.permisos_id')
+                     ->where('usuarios_id', '=', $usuarios_id);
+            })->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
+                $join->on('permisos.id', '=', 'grupos_permisos.permisos_id')
+                     ->wherein('grupos_id', $grupos_id);
+            })->groupBy('permisos.slug')->orderBy('permisos.name')->get();
+        }else{
+            $datos= $permisos->select('permisos.slug', \Illuminate\Support\Facades\DB::raw('BIT_OR(usuarios_permisos.valor) as valor'))->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
+                $join->on('permisos.id', '=', 'usuarios_permisos.permisos_id')
+                     ->where('usuarios_id', '=', $usuarios_id);
+            })->groupBy('permisos.slug')->orderBy('permisos.name')->get();
+
+        }
 
         $d=$datos->toArray();
         return \App\Mk_helpers\Mk_db::sendData(count($d), $d, '', $debug);
@@ -151,36 +175,117 @@ class Mk_auth
         } else {
             $user=$datos->toArray();
             $permisos=$this->permisosGruposMix($user['id'], $user['gruposid'], false);
-            $user['permisos']=$permisos['data'];
+            array_walk($permisos['data'], function(&$el,$clave){
+                $el['slug']=strtolower($el['slug']);
+            });
+            $user['permisos']=array_column($permisos['data'],'valor','slug');
         }
         $this->setUser($user);
         return $user;
     }
 
+    public function cors()
+    {// Allow from any origin
+        if (isset($_SERVER['HTTP_ORIGIN'])) {
+            header("Access-Control-Allow-Origin: *");
+            header('Access-Control-Allow-Credentials: true');
+        }
+
+        // Access-Control headers are received during OPTIONS requests
+        if (!empty($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])) {
+                header('Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, OPTIONS');
+            }
+
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
+                header("Access-Control-Allow-Headers:        {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+            }
+            header("Access-Control-Max-Age", "3600");
+            header("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me");
+        }
+        return true;
+    }
+
     public function canAccess($act='',$controller='')
     {
-        $user=$this->auth->usuario();
-        if (empty($user)){
-            return false;
-        }
+
+        if ($this->_access) return true;
         $router=Request::route()->getAction();
         $router=explode($router['namespace'].'\\', $router['controller']);
         $router=explode('Controller@', $router[1]);
         if (empty($controller)){
-            $controller=$router[0];
+            //$controller=$router[0];
+            $controller='usuarios';
         }
         if (empty($act)){
             $act=$router[1];
         }
 
-        $user=Cache::remember('user', 240, function () use ($user) {//segundos
+        //if ($act=='login') return true;
+        try {
+            $user=$this->auth->usuario();
+        } catch (\Throwable $th) {
+            Mk_debug::msgApi('Error de Logueo:'.$th->getMessage().' >>'.$th->getFile().':'.$th->getLine());
+            $this->setError(-1001,'Error de Logueo');
+            return false;
+        }
+
+        if (empty($user)){
+            return false;
+        }
+
+        $user=Cache::remember('user', $this->timeCache, function () use ($user) {//segundos
             Mk_debug::msgApi('entro');
             return $this->login(null,null,$user->id);
         });
 
         Mk_debug::msgApi($user);
-        //TODO: AQUI me quede
 
+        $act=strtolower($act);
+        $controller=strtolower($controller);
+
+        $actions=['leer'=>'1','ver'=>'1','show'=>'1','index'=>'1','1'=>'1',
+                'editar'=>'2','edit'=>'2','modificar'=>'2','setstatus'=>'2','update'=>'2','2'=>'2',
+                'crear'=>'4','add'=>'4','adicionar'=>'4','alta'=>'4','store'=>'4','4'=>'4',
+                'del'=>'8','elim'=>'8','eliminar'=>'8','delete'=>'8','borrar'=>'8','destroy'=>'8','8'=>'8',
+                ];
+
+        if ((empty(isset($user['permisos'][$controller])))||(empty(isset($actions[$act])))){
+            @Mk_debug::msgApi("No Existen Permisos: controler($controller): {$user['permisos'][$controller]} - Action({$act}): {$actions[$act]})");
+            return $this->setError(-1002,'No Existen Permisos') ;
+        }
+
+        if (!(($user['permisos'][$controller] & $actions[$act])==$actions[$act])){
+            @Mk_debug::msgApi("Error de Acceso $controller/$act:"."!{$user['permisos'][$controller]} & {$actions[$act]} == ".(($user['permisos'][$controller] & $actions[$act])));
+            return $this->setError(-1002,'Error de Acceso');
+        }
+        Mk_debug::msgApi(['Revisando Acceso:',"$controller/$act","{$user['permisos'][$controller]} & {$actions[$act]} == ".(($user['permisos'][$controller] & $actions[$act]))]);
+        $this->_access=true;
+        return true;
+        //TODO: hacer que cuando de error, tambien se envie un msgApi con mas detalle del error
+    }
+
+    public function detener($code='',$msg='')
+    {
+        if (empty($code)){
+            $code=$this->codeError;
+        }
+        if (empty($msg)){
+            $msg=$this->msgError;
+        }
+
+        $this->cors();
+        echo json_encode(\App\Mk_helpers\Mk_db::sendData($code, null, $msg));
+        //echo $th->getMessage().' >>'.$th->getFile().':'.$th->getLine();
+        die();
+    }
+
+    public function proteger($act='',$controller='')
+    {
+        if (!$this->canAccess($act,$controller)){
+            $this->detener();
+        }
+        return true;
     }
 
     public function getMsgError()
@@ -188,6 +293,12 @@ class Mk_auth
         return $this->msgError;
     }
 
+    public function setError($cod,$msg)
+    {
+        $this->msgError=$msg;
+        $this->codeError=$cod;
+        return false;
+    }
     public static function tokenPorCliente() {
         $aud = __SECRET_KEY__;
 
@@ -212,6 +323,7 @@ interface IAuth
     public function estaAutenticado();
     public function destruir();
     public function usuario();
+    public function getToken();
 
 }
 
@@ -219,9 +331,7 @@ class FactoryAuth
 {
     public static function getInstance()
     {
-        //echo "Directorio:".\getcwd();
         $rut=sprintf('App\MK_helpers\Mk_auth\auth\%s\Auth', __AUTH__);
-        //require_once sprintf(__DIR__.'\auth\%s\auth.php', __AUTH__);
         return new $rut();
     }
 }

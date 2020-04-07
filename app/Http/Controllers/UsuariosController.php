@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\App;
 class UsuariosController extends Controller
 {
     use Mk_ia_db;
-    //public $_autorizar='Usuarios';
+    public $_autorizar='';
 
     private $__modelo='\App\Usuarios';
 

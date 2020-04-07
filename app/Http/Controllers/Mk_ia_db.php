@@ -20,22 +20,28 @@ const _errorNoAutenticado=-1001;
 
 trait Mk_ia_db
 {
+    public function proteger($act='',$controler=''){
+
+        if (isset($this->_autorizar)) {
+            if (empty($controler)){
+                if (!empty($this->_autorizar)){
+                    $controler=$this->_autorizar;
+                }
+
+            }
+
+            Mk_auth::get()->proteger($act,$controler);
+        }
+    }
     public function __init(Request $request)
     {
 
-        if (isset($this->_autorizar)){
-            $Auth=Mk_auth::getInstance();
-            if (!$Auth->isLogin()){
-                $Auth->blockData(true);
-                //TODO: ver lamanera que tampoco ejecute ninguna consulta a la BD
-                //TODO: ver si es mas eficiente que sea un middleware
-            }
-        }
         Mk_db::startDbLog();
         return true;
     }
     public function index(Request $request, $_debug=true)
     {
+        $this->proteger();
         $page=Mk_forms::getParam('page', 1);
         $perPage=Mk_forms::getParam('per_page', 5);
         $sortBy=Mk_forms::getParam('sortBy', 'id');
@@ -44,7 +50,7 @@ trait Mk_ia_db
         $cols=$request->cols;
         $disabled=$request->disabled;
 
-        \App\Mk_helpers\Mk_auth\Mk_auth::get()->canAccess();
+        //\App\Mk_helpers\Mk_auth\Mk_auth::get()->canAccess();
         $modelo=new $this->__modelo();
         $table=$modelo->getTable();
 
@@ -117,6 +123,7 @@ trait Mk_ia_db
 
     public function store(Request $request)
     {
+        $this->proteger();
         DB::beginTransaction();
         try {
             $datos = new $this->__modelo();
@@ -150,18 +157,21 @@ trait Mk_ia_db
 
     public function show($id, Request $request)
     {
+        $this->proteger();
         $datos = $this->__modelo::findOrFail($id);
         return $datos;
     }
 
     public function edit($id)
     {
+        $this->proteger();
         $datos = $this->__modelo::findOrFail($id);
         return $datos;
     }
 
     public function update(Request $request, $id)
     {
+        $this->proteger();
         if (!$id) {
             $id=$request->id;
         }
@@ -197,6 +207,7 @@ trait Mk_ia_db
 
     public function destroy(Request $request)
     {
+        $this->proteger();
         $id=explode(',', $request->id);
         DB::beginTransaction();
         try {
@@ -228,6 +239,7 @@ trait Mk_ia_db
 
     public function setStatus(Request $request)
     {
+        $this->proteger();
         $newStatus=$request->status;
         $id=explode(',', $request->id);
         DB::beginTransaction();
