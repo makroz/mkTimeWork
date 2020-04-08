@@ -8,6 +8,14 @@ class Usuarios extends Model
 {
     protected $fillable = ['name','email','pass', 'roles_id','status'];
 
+    public $_validators =[
+        'name' => 'required',
+        'email' => 'required|email',
+        'pass' => 'sometimes|required|min:8',
+        'roles_id' => 'integer',
+        'status' => 'in:0,1'
+    ];
+
     protected $attributes = [
         'status' => 1,
     ];

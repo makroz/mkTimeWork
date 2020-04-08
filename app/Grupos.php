@@ -11,6 +11,11 @@ class Grupos extends Model
 
 
     protected $fillable = ['name', 'descrip','status'];
+    public $_validators =[
+        'name' => 'required',
+        'status' => 'in:0,1'
+    ];
+
 
     protected $attributes = [
         'status' => 1,

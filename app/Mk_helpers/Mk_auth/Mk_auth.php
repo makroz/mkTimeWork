@@ -208,7 +208,6 @@ class Mk_auth
 
     public function canAccess($act='',$controller='')
     {
-
         if ($this->_access) return true;
         $router=Request::route()->getAction();
         $router=explode($router['namespace'].'\\', $router['controller']);

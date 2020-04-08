@@ -7,6 +7,7 @@ use \Illuminate\Http\Request;
 use \App\Mk_helpers\Mk_debug;
 use \App\Mk_helpers\Mk_forms;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 const _maxRowTable=1000;
 const _errorNoExiste=-1;
@@ -127,6 +128,9 @@ trait Mk_ia_db
         DB::beginTransaction();
         try {
             $datos = new $this->__modelo();
+            if (!empty($datos->_validators)){
+                $validatedData = $request->validate($datos->_validators);
+            }
 
             $this->beforeSave($request, $datos, 1);
             $datos->fill($request->except('paramsExtra'));
@@ -178,6 +182,10 @@ trait Mk_ia_db
         DB::beginTransaction();
         try {
             $datos = new $this->__modelo();
+
+            if (!empty($datos->_validators)){
+                $validatedData = $request->validate($datos->_validators);
+            }
 
             $this->beforeSave($request, $datos, 2);
 
