@@ -73,8 +73,10 @@ class Mk_auth
             }
             $userToken->name=$user['name'];
             //$userToken->rol=$user['rol'];
-            Cache::put('user',$user,$this->timeCache);
-            $this->setToken($this->auth->autenticar($userToken));
+
+            $token=$this->auth->autenticar($userToken);
+            $this->setToken($token);
+            Cache::put($token.'.user',$user,$this->timeCache);
         }
 
     }
@@ -233,7 +235,8 @@ class Mk_auth
             return false;
         }
 
-        $user=Cache::remember('user', $this->timeCache, function () use ($user) {//segundos
+        $user=Cache::remember($this->getToken().'.user', $this->timeCache, function () use ($user) {//segundos
+            //TODO: convertir esta funcion en una que lea del HD, podria manejar los nombre por token, si es que no se comparte por otras app
             Mk_debug::msgApi('entro');
             return $this->login(null,null,$user->id);
         });
@@ -261,7 +264,6 @@ class Mk_auth
         Mk_debug::msgApi(['Revisando Acceso:',"$controller/$act","{$user['permisos'][$controller]} & {$actions[$act]} == ".(($user['permisos'][$controller] & $actions[$act]))]);
         $this->_access=true;
         return true;
-        //TODO: hacer que cuando de error, tambien se envie un msgApi con mas detalle del error
     }
 
     public function detener($code='',$msg='')
