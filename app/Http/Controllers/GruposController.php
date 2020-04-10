@@ -49,7 +49,7 @@ class GruposController extends Controller
     public function permisos(Request $request, $grupos_id)
     {
         $permisos = new \App\Permisos();
-        $datos= $permisos->select('permisos.id', 'permisos.name', 'grupos_permisos.valor', 'grupos_permisos.permisos_id')->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
+        $datos= $permisos->select('permisos.id', 'permisos.name', 'grupos_permisos.valor', 'permisos.slug')->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
             $join->on('permisos.id', '=', 'permisos_id')
                  ->where('grupos_id', '=', $grupos_id);
         })->get();
