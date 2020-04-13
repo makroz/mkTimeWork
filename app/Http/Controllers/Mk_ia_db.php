@@ -24,6 +24,7 @@ trait Mk_ia_db
     public function proteger($act='',$controler=''){
 
         if (isset($this->_autorizar)) {
+            Mk_debug::msgApi(['protger autorizar',$this->_autorizar]);
             if (empty($controler)){
                 if (!empty($this->_autorizar)){
                     $controler=$this->_autorizar;
