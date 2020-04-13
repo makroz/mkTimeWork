@@ -1,9 +1,10 @@
 <?php
 namespace App\Mk_helpers\Mk_auth;
 
-use App\Mk_helpers\Mk_debug;
-use \Request;
 use \Cache;
+use \Request;
+use App\Mk_helpers\Mk_debug;
+
 class Mk_auth
 {
     private $newToken = false;
@@ -23,7 +24,6 @@ class Mk_auth
 
     public function __construct($user=null)
     {
-        //$this->model = new $modelo();
         define('__AUTH__', $this->tipo);
         define('__SECRET_KEY__', $this->secret);
         define('__AUTH_LEER__', 1);
@@ -67,11 +67,10 @@ class Mk_auth
         }else{
             $userToken=new \stdClass();
             $userToken->id=$user['id'];
-            $userToken->name=$user['name'];
             foreach ($campos as $key => $value) {
                 $userToken->$value=$user[$value];
             }
-            $userToken->name=$user['name'];
+            //$userToken->name=$user['name'];
             //$userToken->rol=$user['rol'];
 
             $token=$this->auth->autenticar($userToken);
@@ -165,7 +164,8 @@ class Mk_auth
     public function login($username='',$password='',$id=0){
         $modelo=new $this->__modelo();
         if (empty($id)) {
-            $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])->where('email', $username)->where('pass', $password)
+            $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])
+            ->where('email', $username)->where('pass',  sha1($password))
         ->leftJoin('roles', 'roles.id', '=', 'roles_id')->with('grupos')->first();
         }else{
             $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])->where('usuarios.id', $id)
@@ -187,20 +187,18 @@ class Mk_auth
     }
 
     public function cors()
-    {// Allow from any origin
+    {
         if (isset($_SERVER['HTTP_ORIGIN'])) {
             header("Access-Control-Allow-Origin: *");
             header('Access-Control-Allow-Credentials: true');
         }
-
-        // Access-Control headers are received during OPTIONS requests
         if (!empty($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
             if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])) {
                 header('Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, OPTIONS');
             }
 
             if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
-                header("Access-Control-Allow-Headers:        {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+                header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
             }
             header("Access-Control-Max-Age", "3600");
             header("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, remember-me");
@@ -215,8 +213,7 @@ class Mk_auth
         $router=explode($router['namespace'].'\\', $router['controller']);
         $router=explode('Controller@', $router[1]);
         if (empty($controller)){
-            //$controller=$router[0];
-            $controller='usuarios';
+            $controller=strtolower($router[0]);
         }
         if (empty($act)){
             $act=$router[1];
@@ -235,8 +232,7 @@ class Mk_auth
             return false;
         }
 
-        $user=Cache::remember($this->getToken().'.user', $this->timeCache, function () use ($user) {//segundos
-            //TODO: convertir esta funcion en una que lea del HD, podria manejar los nombre por token, si es que no se comparte por otras app
+        $user=Cache::remember($this->getToken().'.user', $this->timeCache, function () use ($user) {
             Mk_debug::msgApi('entro');
             return $this->login(null,null,$user->id);
         });
@@ -277,7 +273,6 @@ class Mk_auth
 
         $this->cors();
         echo json_encode(\App\Mk_helpers\Mk_db::sendData($code, null, $msg));
-        //echo $th->getMessage().' >>'.$th->getFile().':'.$th->getLine();
         die();
     }
 

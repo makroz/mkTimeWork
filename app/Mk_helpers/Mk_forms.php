@@ -28,23 +28,9 @@ class Mk_forms
             return Cache::remember("{$token}.{$name}", self::$timeSession, function () use ($default) {
                 return $default;
             });
-            // $filename = self::$pathtoken.$token.'.tok';
-
-            // if (file_exists($filename)) {
-            //     $contents = json_decode(file_get_contents($filename), true);
-            // } else {
-            //     return $default;
-            // }
-
-            // if ((is_array($contents))and(array_key_exists($name, $contents))) {
-            //     return $contents[$name];
-            // } else {
-            //     return $default;
-            // }
         }
     }
 
-    //TODO: leer una vez la sesion y guardarla en cache;
 
     public static function setSession($name, $value='',$time=86400)
     {
@@ -54,27 +40,6 @@ class Mk_forms
             Session::put($name, $value,$time);
         } else {
             Cache::put("{$token}.{$name}",$value,self::$timeSession);
-            // $filename = self::$pathtoken.$token.'.tok';
-
-            // if (file_exists($filename)) {
-            //     $contents = json_decode(file_get_contents($filename), true);
-            // } else {
-            //     $contents=array();
-            // }
-            // if (!is_array($contents)) {
-            //     $contents=array();
-            // }
-            // if (array_key_exists($name, $contents)) {
-            //     $contents[$name]=$value;
-            // } else {
-            //     $contents = array_merge(array($name=>$value), $contents);
-            // }
-
-            // //$contents[$name]=$value;
-            // file_put_contents($filename, json_encode($contents));
-            // self::$counter=self::$counter+1;
-            // if (self::$counter==1) {
-            // }
         }
         return true;
     }

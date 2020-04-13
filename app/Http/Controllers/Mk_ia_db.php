@@ -133,8 +133,9 @@ trait Mk_ia_db
                 $validatedData = $request->validate($datos->_validators);
             }
 
-            $this->beforeSave($request, $datos, 1);
+
             $datos->fill($request->except('paramsExtra'));
+            $this->beforeSave($request, $datos, 1);
             //$datos->status = '1';
             $r=$datos->save();
 

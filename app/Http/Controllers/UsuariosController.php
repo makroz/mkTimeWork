@@ -31,6 +31,12 @@ class UsuariosController extends Controller
         }
     }
 
+    public function beforeSave(Request $request, $modelo, $action=1)
+    {
+        if ($action==1){
+            $modelo->pass= sha1($modelo->pass);
+        }
+    }
 
     public function afterSave(Request $request, $modelo, $error=0, $action=1)
     {
@@ -56,7 +62,8 @@ class UsuariosController extends Controller
     public function permisos(Request $request, $usuarios_id)
     {
         $permisos = new \App\Permisos();
-        $datos= $permisos->select('permisos.id', 'permisos.name', 'usuarios_permisos.valor', 'permisos.slug')->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
+        $datos= $permisos->select('permisos.id', 'permisos.name', 'usuarios_permisos.valor', 'permisos.slug')
+        ->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
             $join->on('permisos.id', '=', 'permisos_id')
                  ->where('usuarios_id', '=', $usuarios_id);
         })->orderBy('permisos.name')->get();

@@ -71,7 +71,7 @@ class CreateModUsuariosV1 extends Migration
             $table->foreign('permisos_id')->references('id')->on('permisos')->onDelete('cascade')->onUpdate('cascade');
             $table->smallInteger('grupos_id')->unsigned();
             $table->foreign('grupos_id')->references('id')->on('grupos')->onDelete('cascade')->onUpdate('cascade');
-//            $table>unique(['grupos_id', 'permisos_id']);
+            $table->unique(['grupos_id', 'permisos_id']);
         });
 
 
@@ -104,6 +104,7 @@ class CreateModUsuariosV1 extends Migration
             $table->foreign('usuarios_id')->references('id')->on('usuarios')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('permisos_id')->unsigned();
             $table->foreign('permisos_id')->references('id')->on('permisos')->onDelete('cascade')->onUpdate('cascade');
+            $table->unique(['usuarios_id','permisos_id']);
         });
 
         $nTable='usuarios_grupos';
@@ -115,6 +116,7 @@ class CreateModUsuariosV1 extends Migration
             $table->foreign('usuarios_id')->references('id')->on('usuarios')->onDelete('cascade')->onUpdate('cascade');
             $table->smallInteger('grupos_id')->unsigned();
             $table->foreign('grupos_id')->references('id')->on('grupos')->onDelete('cascade')->onUpdate('cascade');
+            $table->unique(['usuarios_id', 'grupos_id']);
         });
 
         Schema::enableForeignKeyConstraints();
