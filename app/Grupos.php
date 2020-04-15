@@ -8,26 +8,22 @@ class Grupos extends Model
 {
     use Http\Controllers\Mk_ia_model;
 
-
-
     protected $fillable = ['name', 'descrip','status'];
+    protected $attributes = ['status' => 1];
+    protected $cascadeDeletes = ['usuarios','permisos'];
+
     public $_validators =[
         'name' => 'required',
         'status' => 'in:0,1'
     ];
 
-
-    protected $attributes = [
-        'status' => 1,
-    ];
-
-    //public $_pivotes = ['permisos:permisos.id,permisos.name,permisos.status'];
-
     public function permisos()
     {
-        return $this->belongsToMany('App\Permisos')
+        return $this->belongsToMany('App\Permisos','grupos_permisos')
         ->withPivot('valor');
-        // Si el nombre de la tabla es diferente a lo predeterminado o el ID de la tabla tiene otro nombre.
-        //return $this->belongsToMany('App\Role', 'user_roles', 'user_id', 'role_id');
+    }
+    public function usuarios()
+    {
+        return $this->belongsToMany('App\Usuarios','usuarios_grupos');
     }
 }

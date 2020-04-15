@@ -176,7 +176,7 @@ class Mk_auth
             $user=[];
         } else {
             $user=$datos->toArray();
-            $permisos=$this->permisosGruposMix($user['id'], $user['gruposid'], false);
+            $permisos=$this->permisosGruposMix($user['id'], $user['grupos'], false);
             array_walk($permisos['data'], function(&$el,$clave){
                 $el['slug']=strtolower($el['slug']);
             });

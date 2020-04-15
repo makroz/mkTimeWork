@@ -52,7 +52,6 @@ trait Mk_ia_db
         $cols=$request->cols;
         $disabled=$request->disabled;
 
-        //\App\Mk_helpers\Mk_auth\Mk_auth::get()->canAccess();
         $modelo=new $this->__modelo();
         $table=$modelo->getTable();
 
@@ -77,8 +76,8 @@ trait Mk_ia_db
         }
 
 
-        if (isset($modelo->_relaciones)) {
-            $consulta = $consulta->with($modelo->_relaciones);
+        if (isset($modelo->_withRelations)) {
+                $consulta = $consulta->with($modelo->_withRelations);
         }
 
         if ($cols!='') {
@@ -88,20 +87,12 @@ trait Mk_ia_db
             $cols=array_merge([$modelo->getKeyName()], $modelo->getFill());
         }
 
-        //$consulta= $consulta->makeHidden(['grupos.pivot']);
-
         $datos = $consulta->paginate($perPage, $cols, 'page', $page);
-
-        // if ($modelo->hidden) {
-        //     $total=$datos['total'];
-        //     $datos=$datos->makeHidden('datagrupos.pivot');
-        //     $datos['total']=$total;
-        // }
 
         if ($request->ajax()) {
             return  $datos;
         } else {
-            $d=$datos->toArray($modelo->getHidden());
+            $d=$datos->toArray();
             $data = ['ok' => $d['total'], 'data' => $d['data']];
             return Mk_db::sendData($d['total'], $d['data'], '', $_debug);
         }
@@ -223,11 +214,10 @@ trait Mk_ia_db
         try {
             $datos = new $this->__modelo();
             $this->beforeDel($id, $datos);
+            $datos->runCascadingDeletes($id);
             $r=$datos->wherein('id', $id)
             ->delete();
-            //TODO: hacer el sofdelete a las relaciones tambien
             $msg='';
-
             if ($r==0) {
                 $r=_errorNoExiste;
                 $msg='Registro ya NO EXISTE';
@@ -244,6 +234,18 @@ trait Mk_ia_db
 
         if (!$request->ajax()) {
             return Mk_db::sendData($r, $this->index($request, false), $msg);
+        }
+    }
+
+    public function deleteCascade($ids, $modelo, $error=0)
+    {
+        if ($error>=0) {
+            foreach ($ids as $key => $value) {
+                if (($value!='')and($value>0)) {
+                    $modelo->id=$value ;
+                    $modelo->permisos()->detach();
+                }
+            }
         }
     }
 

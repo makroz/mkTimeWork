@@ -19,18 +19,6 @@ class UsuariosController extends Controller
         return true;
     }
 
-    public function afterDel($ids, $modelo, $error=0)
-    {
-        if ($error>=0) {
-            foreach ($ids as $key => $value) {
-                if (($value!='')and($value>0)) {
-                    $modelo->id=$value ;
-                    $modelo->permisos()->detach();
-                }
-            }
-        }
-    }
-
     public function beforeSave(Request $request, $modelo, $action=1)
     {
         if ($action==1){

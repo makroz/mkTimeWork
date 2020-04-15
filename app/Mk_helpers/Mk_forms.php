@@ -12,12 +12,6 @@ class Mk_forms
 {
     public static $ses;
     public static $timeSession=86400;
-    public function __construct()
-    {
-        $this->counter = 0;
-
-        Mk_debug::msgApi('constructor form:');
-    }
 
     public static function getSession($name, $default='')
     {
@@ -35,7 +29,6 @@ class Mk_forms
     public static function setSession($name, $value='',$time=86400)
     {
         $token=Mk_auth::get()->getTokenCoockie();
-        //TODO:  llevar esto a otro helper de sesion o coquie
         if ($token=='') {
             Session::put($name, $value,$time);
         } else {

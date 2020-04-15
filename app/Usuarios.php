@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Usuarios extends Model
 {
+    use Http\Controllers\Mk_ia_model;
+
     protected $fillable = ['name','email','pass', 'roles_id','status'];
+    protected $attributes = ['status' => 1];
+    protected $hidden = ['pass'];
 
     public $_validators =[
         'name' => 'required',
@@ -16,16 +20,9 @@ class Usuarios extends Model
         'status' => 'in:0,1'
     ];
 
-    protected $attributes = [
-        'status' => 1,
-    ];
-
-    protected $hidden = ['pass'];
-
-
-    public $_relaciones = ['grupos:grupos.id'];
-
-    use Http\Controllers\Mk_ia_model;
+    public $_withRelations = ['grupos'];
+    public $_pivot2Array = ['grupos'];
+    protected $cascadeDeletes = ['permisos','grupos'];
 
     public function permisos()
     {
@@ -35,8 +32,8 @@ class Usuarios extends Model
 
     public function grupos()
     {
-        return $this->belongsToMany('App\Grupos', 'usuarios_grupos')
-        ->withPivot('grupos_id');
+        return $this->belongsToMany('App\Grupos', 'usuarios_grupos');
+
     }
 
     public function roles()
@@ -44,25 +41,4 @@ class Usuarios extends Model
         return $this->hasMany('App\Roles');
     }
 
-    public function toArray()
-    {
-        $attributes = $this->attributesToArray();
-        $attributes = array_merge($attributes, $this->relationsToArray());
-
-        if (isset($attributes['grupos'])) {
-            if (isset($attributes['gruposid'])) {
-                $i=$attributes['gruposid'];
-            } else {
-                $i=[];
-            }
-            foreach ($attributes['grupos'] as $key => $value) {
-                $i[]=$value['id'];
-            }
-            $attributes['gruposid'] = $i;
-            unset($attributes['grupos']);
-        }
-
-        unset($attributes['pivot']);
-        return $attributes;
-    }
 }
