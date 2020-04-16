@@ -14,46 +14,35 @@ use Illuminate\Http\Request;
 */
 
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-
 Route::post('login', 'UsuariosController@login');
 Route::post('logout', 'UsuariosController@logout');
 
-
-Route::resource('Grupos_permisos', 'Grupos_permisosController');
-
-Route::get('Grupos_permisos/', 'Grupos_permisosController@index');
-Route::post('Grupos_permisos/delete', 'Grupos_permisosController@destroy');
-Route::post('Grupos_permisos/setStatus', 'Grupos_permisosController@setStatus');
-
 Route::resource('Grupos', 'GruposController');
 Route::group(['prefix' => 'Grupos'], function () {
-    Route::get('/', 'GruposController@index');
+   // Route::get('/', 'GruposController@index');
     Route::post('/delete', 'GruposController@destroy');
     Route::post('/setStatus', 'GruposController@setStatus');
     Route::post('/permisos/{grupos_id}', 'GruposController@permisos');
 });
 Route::resource('Permisos', 'PermisosController');
 Route::group(['prefix' => 'Permisos'], function () {
-    Route::get('/', 'PermisosController@index');
+   // Route::get('/', 'PermisosController@index');
     Route::post('/delete', 'PermisosController@destroy');
     Route::post('/setStatus', 'PermisosController@setStatus');
 });
 
 Route::resource('Roles', 'RolesController');
 Route::group(['prefix' => 'Roles'], function () {
-    Route::get('/', 'RolesController@index');
+    //Route::get('/', 'RolesController@index');
     Route::post('/delete', 'RolesController@destroy');
     Route::post('/setStatus', 'RolesController@setStatus');
 });
 
 Route::resource('Usuarios', 'UsuariosController');
 Route::group(['prefix' => 'Usuarios'], function () {
-    Route::get('/', 'UsuariosController@index');
+    //Route::get('/', 'UsuariosController@index');
     Route::post('/delete', 'UsuariosController@destroy');
+    Route::get('/{id}', 'UsuariosController@show');
     Route::post('/setStatus', 'UsuariosController@setStatus');
     Route::post('/permisos/{grupos_id}', 'UsuariosController@permisos');
     Route::post('/permisosGrupos/{usuarios_id}', 'UsuariosController@permisosGrupos');

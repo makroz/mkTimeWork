@@ -11,11 +11,8 @@
 |
 */
 
-Route::get('/', function () {
-    return view('contenido.contenido');
-});
 
-Route::resource('Grupos_permisos', 'Grupos_permisosController');
+//Route::resource('Grupos_permisos', 'Grupos_permisosController');
 
 
 //Route::get('user/login', 'Grupos_permisosController@api');

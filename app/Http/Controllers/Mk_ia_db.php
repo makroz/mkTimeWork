@@ -154,9 +154,34 @@ trait Mk_ia_db
 
     public function show($id, Request $request)
     {
-        $this->proteger();
-        $datos = $this->__modelo::findOrFail($id);
-        return $datos;
+        try {
+            $this->proteger();
+        $datos= new $this->__modelo;
+        $key=$datos->getKeyName();
+        $datos = $datos->where(str_replace("'", "",DB::connection()->getPdo()->quote( $request->where)),
+                                str_replace("'", "",DB::connection()->getPdo()->quote( $request->valor)))
+                        ->where($datos->getKeyName(),'!=',$id);
+        if (empty($request->existe)){
+            $datos = $datos->first();
+            if (!$datos){
+                $id=-1;
+            }else{
+                $id=$datos->$key;
+            }
+            return Mk_db::sendData($id, $datos);
+        }else{
+            $datos = $datos->select($key)->first();
+            if (!$datos){
+                $id=-1;
+            }else{
+                $id=$datos->$key;
+            }
+
+            return Mk_db::sendData($id);
+        }
+        } catch (\Throwable $th) {
+            return Mk_db::sendData(-2,null,$th->getMessage());
+        }
     }
 
     public function edit($id)

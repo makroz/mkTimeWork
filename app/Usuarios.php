@@ -14,7 +14,7 @@ class Usuarios extends Model
 
     public $_validators =[
         'name' => 'required',
-        'email' => 'required|email',
+        'email' => 'required|email|unique:usuarios,email',
         'pass' => 'sometimes|required|min:8',
         'roles_id' => 'integer',
         'status' => 'in:0,1'
