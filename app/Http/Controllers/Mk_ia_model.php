@@ -3,10 +3,12 @@ namespace App\Http\Controllers;
 
 use App\Mk_helpers\Mk_debug;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 trait Mk_ia_model
 {
-    use \Illuminate\Database\Eloquent\SoftDeletes;
+    use SoftDeletes;
 
     public function getFill()
     {
@@ -54,13 +56,13 @@ trait Mk_ia_model
         $id=$this->{$relationship}()->getForeignPivotKeyName();
         DB::table($table)
                ->whereIn($id, $ids)
-               ->update([CREATED_AT =>  NOW()]);
+               ->update([$this->getDeletedAtColumn() =>  $this->fromDateTime($this->freshTimestamp())]);
     }
 
     protected function hasInvalidCascadingRelationships()
     {
         return array_filter($this->getCascadingDeletes(), function ($relationship) {
-            return ! method_exists($this, $relationship) || ! $this->{$relationship}() instanceof Relation;
+            return  !method_exists($this, $relationship) ||  !$this->{$relationship}() instanceof Relation;
         });
     }
 
