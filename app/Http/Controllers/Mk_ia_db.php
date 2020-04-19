@@ -49,6 +49,7 @@ trait Mk_ia_db
         $sortBy=Mk_forms::getParam('sortBy', 'id');
         $order=Mk_forms::getParam('order', 'desc');
         $buscarA=Mk_forms::getParam('buscar', '');
+        $recycled=$request->recycled;
         $cols=$request->cols;
         $disabled=$request->disabled;
 
@@ -66,6 +67,10 @@ trait Mk_ia_db
         }
 
         $consulta=$this->__modelo::orderBy($sortBy, $order);
+
+        if ($recycled==1){
+            $consulta=$consulta->onlyTrashed();
+        }
 
         if ($where!='') {
             $consulta = $consulta->whereRaw($where);
