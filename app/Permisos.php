@@ -12,11 +12,13 @@ class Permisos extends Model
     protected $attributes = ['status' => 1];
     protected $cascadeDeletes = ['usuarios','grupos'];
 
-    public $_validators =[
+    public function getRules($request){
+        return [
         'name' => 'required',
-        'slug' => 'required',
+        'slug' => 'required|unique:permisos,slug,'.$request->input('id'),
         'status' => 'in:0,1'
     ];
+    }
 
     public function usuarios()
     {

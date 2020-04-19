@@ -12,10 +12,12 @@ class Grupos extends Model
     protected $attributes = ['status' => 1];
     protected $cascadeDeletes = ['usuarios','permisos'];
 
-    public $_validators =[
+    public function getRules($request){
+        return [
         'name' => 'required',
         'status' => 'in:0,1'
-    ];
+        ];
+    }
 
     public function permisos()
     {
