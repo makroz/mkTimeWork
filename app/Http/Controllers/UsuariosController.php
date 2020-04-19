@@ -9,13 +9,21 @@ class UsuariosController extends Controller
 {
     use Mk_ia_db;
     //public $_autorizar='';
+    public $_validators=[];
+
 
     private $__modelo='\App\Usuarios';
 
     public function __construct(Request $request)
     {
         $this->__init($request);
-
+        $this->_validator= [
+            'name' => 'required',
+            'email' => 'required|email|unique:usuarios,email,'.$request->input('id'),
+            'pass' => 'sometimes|required|min:8',
+            'roles_id' => 'integer',
+            'status' => 'in:0,1'
+        ];
         return true;
     }
 

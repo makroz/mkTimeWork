@@ -120,14 +120,13 @@ trait Mk_ia_db
         DB::beginTransaction();
         try {
             $datos = new $this->__modelo();
-            if (!empty($datos->_validators)){
-                $validatedData = $request->validate($datos->_validators);
+            $rules=$datos->getRules($request);
+            if (!empty($rules)){
+                $validatedData = $request->validate($rules);
             }
 
-
-            $datos->fill($request->except('paramsExtra'));
+            $datos->fill($request->only($datos->getfill()));
             $this->beforeSave($request, $datos, 1);
-            //$datos->status = '1';
             $r=$datos->save();
 
 
@@ -200,19 +199,16 @@ trait Mk_ia_db
         DB::beginTransaction();
         try {
             $datos = new $this->__modelo();
-
-            if (!empty($datos->_validators)){
-                $validatedData = $request->validate($datos->_validators);
+            $rules=$datos->getRules($request);
+            if (!empty($rules)){
+                $validatedData = $request->validate($rules);
             }
-
             $this->beforeSave($request, $datos, 2);
-
             $r=$datos->where('id', '=', $id)
              ->update(
-                 $request->except('paramsExtra')
+                 $request->only($datos->getfill())
              );
             $msg='';
-
             if ($r==0) {
                 $r=_errorNoExiste;
                 $msg='Registro ya NO EXISTE';
@@ -224,9 +220,10 @@ trait Mk_ia_db
         } catch (\Throwable $th) {
             DB::rollback();
             $r=_errorAlGrabar2;
-            $msg='Error mientras se Actualizaba: '.$th->getMessage();
+            $msg='Error mientras se Actualizaba: '.$th->getLine().':'.$th->getFile().'='.$th->getMessage();
         }
         if (!$request->ajax()) {
+
             return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
     }

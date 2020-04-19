@@ -14,6 +14,9 @@ trait Mk_ia_model
     {
         return $this->fillable;
     }
+    public function getRules($request){
+        return null;
+    }
 
     public function toArray()
     {

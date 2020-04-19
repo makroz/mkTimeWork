@@ -12,18 +12,20 @@ class Usuarios extends Model
     protected $attributes = ['status' => 1];
     protected $hidden = ['pass'];
 
-    public $_validators =[
-        'name' => 'required',
-        'email' => 'required|email|unique:usuarios,email',
-        'pass' => 'sometimes|required|min:8',
-        'roles_id' => 'integer',
-        'status' => 'in:0,1'
-    ];
 
     public $_withRelations = ['grupos'];
     public $_pivot2Array = ['grupos'];
     protected $cascadeDeletes = ['permisos','grupos'];
 
+    public function getRules($request){
+        return [
+            'name' => 'required',
+            'email' => 'required|email|unique:usuarios,email,'.$request->input('id'),
+            'pass' => 'sometimes|required|min:8',
+            'roles_id' => 'integer',
+            'status' => 'in:0,1'
+        ];
+    }
     public function permisos()
     {
         return $this->belongsToMany('App\Permisos', 'usuarios_permisos')
