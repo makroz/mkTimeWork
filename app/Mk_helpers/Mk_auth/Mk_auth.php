@@ -245,7 +245,7 @@ class Mk_auth
         $actions=['leer'=>'1','ver'=>'1','show'=>'1','index'=>'1','1'=>'1',
                 'editar'=>'2','edit'=>'2','modificar'=>'2','setstatus'=>'2','update'=>'2','2'=>'2',
                 'crear'=>'4','add'=>'4','adicionar'=>'4','alta'=>'4','store'=>'4','4'=>'4',
-                'del'=>'8','elim'=>'8','eliminar'=>'8','delete'=>'8','borrar'=>'8','destroy'=>'8','8'=>'8',
+                'del'=>'8','elim'=>'8','eliminar'=>'8','delete'=>'8','borrar'=>'8','destroy'=>'8','restore'=>'8','recycled'=>'8', 'restaurar'=>'8','recyclar'=>'8','8'=>'8'
                 ];
 
         if ((empty(isset($user['permisos'][$controller])))||(empty(isset($actions[$act])))){

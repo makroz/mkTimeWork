@@ -43,23 +43,27 @@ trait Mk_ia_model
     }
 
 //****softdelete cascade ***
-    public function runCascadingDeletes($ids)
+    public function runCascadingDeletes($ids,$restore=false)
     {
         if ($invalidCascadingRelationships = $this->hasInvalidCascadingRelationships()) {
             throw CascadeSoftDeleteException::invalidRelationships($invalidCascadingRelationships);
         }
         foreach ($this->getActiveCascadingDeletes() as $relationship) {
-            $this->cascadeSoftDeletes($relationship,$ids);
+            $this->cascadeSoftDeletes($relationship,$ids,$restore);
         }
     }
 
-    protected function cascadeSoftDeletes($relationship,$ids)
+    protected function cascadeSoftDeletes($relationship,$ids,$restore=false)
     {
+        $dato=$this->fromDateTime($this->freshTimestamp());
+        if ($restore){
+            $dato=null;
+        }
         $table=$this->{$relationship}()->getTable();
         $id=$this->{$relationship}()->getForeignPivotKeyName();
         DB::table($table)
                ->whereIn($id, $ids)
-               ->update([$this->getDeletedAtColumn() =>  $this->fromDateTime($this->freshTimestamp())]);
+               ->update([$this->getDeletedAtColumn() =>  $dato]);
     }
 
     protected function hasInvalidCascadingRelationships()

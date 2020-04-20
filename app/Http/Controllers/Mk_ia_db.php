@@ -103,21 +103,14 @@ trait Mk_ia_db
         }
     }
 
-    public function beforeDel($id, $modelo)
-    {
-    }
+    public function beforeDel($id, $modelo){}
+    public function afterDel($id, $modelo, $error=0){}
 
-    public function afterDel($id, $modelo, $error=0)
-    {
-    }
+    public function beforeRestore($id, $modelo){}
+    public function afterRestore($id, $modelo, $error=0){}
 
-    public function beforeSave(Request $request, $modelo, $action=1)
-    {
-    }
-
-    public function afterSave(Request $request, $modelo, $error=0, $action=1)
-    {
-    }
+    public function beforeSave(Request $request, $modelo, $action=1){}
+    public function afterSave(Request $request, $modelo, $error=0, $action=1){}
 
     public function store(Request $request)
     {
@@ -236,14 +229,20 @@ trait Mk_ia_db
     public function destroy(Request $request)
     {
         $this->proteger();
+        $recycled=$request->recycled;
         $id=explode(',', $request->id);
         DB::beginTransaction();
         try {
             $datos = new $this->__modelo();
             $this->beforeDel($id, $datos);
-            $datos->runCascadingDeletes($id);
-            $r=$datos->wherein('id', $id)
-            ->delete();
+            if ($recycled==1){
+                $r=$datos->onlyTrashed()->wherein('id', $id)
+                ->forceDelete();;
+            }else{
+                $datos->runCascadingDeletes($id);
+                $r=$datos->wherein('id', $id)
+                ->delete();
+            }
             $msg='';
             if ($r==0) {
                 $r=_errorNoExiste;
@@ -264,17 +263,53 @@ trait Mk_ia_db
         }
     }
 
-    public function deleteCascade($ids, $modelo, $error=0)
+    public function restore(Request $request)
     {
-        if ($error>=0) {
-            foreach ($ids as $key => $value) {
-                if (($value!='')and($value>0)) {
-                    $modelo->id=$value ;
-                    $modelo->permisos()->detach();
-                }
+        $this->proteger();
+        $recycled=$request->recycled;
+        $id=explode(',', $request->id);
+
+        DB::beginTransaction();
+        try {
+            if ($recycled!=1) {
+                throw new Exception("Debe estar en Papelera de Reciclaje", 1);
             }
+            $datos = new $this->__modelo();
+            $this->beforeRestore($id, $datos);
+                $datos->runCascadingDeletes($id,true);
+                $r=$datos->onlyTrashed()->wherein('id', $id)
+                ->restore();
+            $msg='';
+            if ($r==0) {
+                $r=_errorNoExiste;
+                $msg='Registro ya NO EXISTE';
+                DB::rollback();
+            } else {
+                $this->afterRestore($id, $datos, $r);
+                DB::commit();
+            }
+        } catch (\Throwable $th) {
+            DB::rollback();
+            $r=_errorAlGrabar2;
+            $msg='Error mientras se Restauraba: '.$th->getMessage();
+        }
+
+        if (!$request->ajax()) {
+            return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
     }
+
+    // public function deleteCascade($ids, $modelo, $error=0)
+    // {
+    //     if ($error>=0) {
+    //         foreach ($ids as $key => $value) {
+    //             if (($value!='')and($value>0)) {
+    //                 $modelo->id=$value ;
+    //                 $modelo->permisos()->detach();
+    //             }
+    //         }
+    //     }
+    // }
 
     public function setStatus(Request $request)
     {
