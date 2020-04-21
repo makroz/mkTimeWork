@@ -1,5 +1,6 @@
 <?php
 
+use \App\Mk_helpers\Mk_app;
 use Illuminate\Http\Request;
 
 /*
@@ -13,38 +14,16 @@ use Illuminate\Http\Request;
 |
 */
 
+Mk_app::setRuta('Roles');
+Mk_app::setRuta('Grupos');
+Mk_app::setRuta('Permisos',['extras'=>[
+    ['post','/permisos/{grupos_id}','permisos']
+]]);
 
 Route::post('login', 'UsuariosController@login');
 Route::post('logout', 'UsuariosController@logout');
+Mk_app::setRuta('Usuarios',['extras'=>[
+                ['post','/permisos/{grupos_id}','permisos'],
+                ['post','/permisosGrupos/{usuarios_id}','permisosGrupos']
+]]);
 
-Route::resource('Grupos', 'GruposController');
-Route::group(['prefix' => 'Grupos'], function () {
-    Route::post('/delete', 'GruposController@destroy');
-    Route::post('/restore', 'GruposController@restore');
-    Route::post('/setStatus', 'GruposController@setStatus');
-    Route::post('/permisos/{grupos_id}', 'GruposController@permisos');
-});
-Route::resource('Permisos', 'PermisosController');
-Route::group(['prefix' => 'Permisos'], function () {
-    Route::post('/delete', 'PermisosController@destroy');
-    Route::post('/restore', 'PermisosController@restore');
-    Route::post('/setStatus', 'PermisosController@setStatus');
-});
-
-Route::resource('Roles', 'RolesController');
-Route::group(['prefix' => 'Roles'], function () {
-    Route::post('/delete', 'RolesController@destroy');
-    Route::post('/restore', 'RolesController@restore');
-    Route::post('/setStatus', 'RolesController@setStatus');
-});
-
-Route::resource('Usuarios', 'UsuariosController');
-Route::group(['prefix' => 'Usuarios'], function () {
-    //Route::get('/', 'UsuariosController@index');
-    Route::post('/delete', 'UsuariosController@destroy');
-    Route::post('/restore', 'UsuariosController@restore');
-    //Route::get('/{id}', 'UsuariosController@show');
-    Route::post('/setStatus', 'UsuariosController@setStatus');
-    Route::post('/permisos/{grupos_id}', 'UsuariosController@permisos');
-    Route::post('/permisosGrupos/{usuarios_id}', 'UsuariosController@permisosGrupos');
-});
