@@ -52,11 +52,19 @@ trait Mk_ia_db
         $recycled=$request->recycled;
         $cols=$request->cols;
         $disabled=$request->disabled;
-
+        $prefix=md5(collect([$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled])>toArray());
         $modelo=new $this->__modelo();
         $table=$modelo->getTable();
 
+
+
+        $consulta=$this->__modelo::orderBy($sortBy, $order);
+
         $where=Mk_db::getWhere($buscarA);
+
+        if ($recycled==1){
+            $consulta=$consulta->onlyTrashed();
+        }
 
         if ($disabled==1) {
             if ($where != '') {
@@ -64,12 +72,6 @@ trait Mk_ia_db
             } else {
                 $where ="({$table}.status<>'0')";
             }
-        }
-
-        $consulta=$this->__modelo::orderBy($sortBy, $order);
-
-        if ($recycled==1){
-            $consulta=$consulta->onlyTrashed();
         }
 
         if ($where!='') {
@@ -93,6 +95,8 @@ trait Mk_ia_db
         }
 
         $datos = $consulta->paginate($perPage, $cols, 'page', $page);
+
+
 
         if ($request->ajax()) {
             return  $datos;
