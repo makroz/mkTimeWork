@@ -7,6 +7,7 @@ class Mk_debug
     private static $_mk_debug=-1;
     private static $_mk_debugDb=false;
     private static $msgApi=array();
+    private static $counter=0;
 
 
     public static function __init()
@@ -26,7 +27,8 @@ class Mk_debug
         }
         $call=debug_backtrace(2,2);
         //$call='   >> ['.basename($call[0]['file']).':'.$call[0]['line'].']';
-        $call=date('His').rand(1,100).':'.basename($call[0]['file']).':'.$call[0]['line'];
+        self::$counter++;
+        $call=self::$counter.'-'.date('H:i:s').'('.basename($call[0]['file']).')'.$call[0]['line'];
         self::$msgApi[$call]=$msg;
 
         return true;

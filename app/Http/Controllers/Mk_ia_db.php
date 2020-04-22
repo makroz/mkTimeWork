@@ -2,11 +2,12 @@
 namespace App\Http\Controllers;
 
 use \App\Mk_helpers\Mk_db;
-use \App\Mk_helpers\Mk_auth\Mk_auth;
-use \Illuminate\Http\Request;
 use \App\Mk_helpers\Mk_debug;
 use \App\Mk_helpers\Mk_forms;
+use \Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use \App\Mk_helpers\Mk_auth\Mk_auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 const _maxRowTable=1000;
@@ -15,6 +16,7 @@ const _errorAlGrabar=-10;
 const _errorAlGrabar2=-11;
 const _errorLogin=-1000;
 const _errorNoAutenticado=-1001;
+const _cachedQuerys='cachedQuerys_';
 
 
 
@@ -37,7 +39,6 @@ trait Mk_ia_db
     }
     public function __init(Request $request)
     {
-
         Mk_db::startDbLog();
         return true;
     }
@@ -52,51 +53,50 @@ trait Mk_ia_db
         $recycled=$request->recycled;
         $cols=$request->cols;
         $disabled=$request->disabled;
-        $prefix=md5(collect([$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled])>toArray());
-        $modelo=new $this->__modelo();
-        $table=$modelo->getTable();
 
+        $prefix=$this->addCacheList([$this->__modelo,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled]);
 
+        $datos=Cache::remember($prefix, 60*60*24, function () use ($prefix,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled) {
+            $modelo=new $this->__modelo();
+            $table=$modelo->getTable();
+            $consulta=$modelo->orderBy($sortBy, $order);
 
-        $consulta=$this->__modelo::orderBy($sortBy, $order);
+            $where=Mk_db::getWhere($buscarA);
 
-        $where=Mk_db::getWhere($buscarA);
-
-        if ($recycled==1){
-            $consulta=$consulta->onlyTrashed();
-        }
-
-        if ($disabled==1) {
-            if ($where != '') {
-                $where ='('. $where. ")and({$table}.status<>'0')";
-            } else {
-                $where ="({$table}.status<>'0')";
+            if ($recycled==1){
+                $consulta=$consulta->onlyTrashed();
             }
-        }
 
-        if ($where!='') {
-            $consulta = $consulta->whereRaw($where);
-        }
+            if ($disabled==1) {
+                if ($where != '') {
+                    $where ='('. $where. ")and({$table}.status<>'0')";
+                } else {
+                    $where ="({$table}.status<>'0')";
+                }
+            }
 
-        if ($perPage<0) {
-            $perPage=_maxRowTable;
-        }
+            if ($where!='') {
+                $consulta = $consulta->whereRaw($where);
+            }
 
-
-        if (isset($modelo->_withRelations)) {
-                $consulta = $consulta->with($modelo->_withRelations);
-        }
-
-        if ($cols!='') {
-            $cols=explode(',', $cols);
-            $cols=array_merge([$modelo->getKeyName()], $cols);
-        } else {
-            $cols=array_merge([$modelo->getKeyName()], $modelo->getFill());
-        }
-
-        $datos = $consulta->paginate($perPage, $cols, 'page', $page);
+            if ($perPage<0) {
+                $perPage=_maxRowTable;
+            }
 
 
+            if (isset($modelo->_withRelations)) {
+                    $consulta = $consulta->with($modelo->_withRelations);
+            }
+
+            if ($cols!='') {
+                $cols=explode(',', $cols);
+                $cols=array_merge([$modelo->getKeyName()], $cols);
+            } else {
+                $cols=array_merge([$modelo->getKeyName()], $modelo->getFill());
+            }
+            Mk_debug::msgApi('Se añadio Item Cache:'.$prefix);
+            return $consulta->paginate($perPage, $cols, 'page', $page);
+        });
 
         if ($request->ajax()) {
             return  $datos;
@@ -137,6 +137,7 @@ trait Mk_ia_db
                 $msg='';
                 $this->afterSave($request, $datos, $r, 1);
                 DB::commit();
+                $this->clearCache();
             } else {
                 DB::rollback();
                 $r=_errorAlGrabar;
@@ -218,6 +219,7 @@ trait Mk_ia_db
             } else {
                 $this->afterSave($request, $datos, $r, 2);
                 DB::commit();
+                $this->clearCache();
             }
         } catch (\Throwable $th) {
             DB::rollback();
@@ -255,6 +257,7 @@ trait Mk_ia_db
             } else {
                 $this->afterDel($id, $datos, $r);
                 DB::commit();
+                $this->clearCache();
             }
         } catch (\Throwable $th) {
             DB::rollback();
@@ -291,6 +294,7 @@ trait Mk_ia_db
             } else {
                 $this->afterRestore($id, $datos, $r);
                 DB::commit();
+                $this->clearCache();
             }
         } catch (\Throwable $th) {
             DB::rollback();
@@ -302,18 +306,6 @@ trait Mk_ia_db
             return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
     }
-
-    // public function deleteCascade($ids, $modelo, $error=0)
-    // {
-    //     if ($error>=0) {
-    //         foreach ($ids as $key => $value) {
-    //             if (($value!='')and($value>0)) {
-    //                 $modelo->id=$value ;
-    //                 $modelo->permisos()->detach();
-    //             }
-    //         }
-    //     }
-    // }
 
     public function setStatus(Request $request)
     {
@@ -334,7 +326,33 @@ trait Mk_ia_db
                 DB::rollback();
             }
             DB::commit();
+            $this->clearCache();
             return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
+    }
+
+    private function addCacheList($key=['ok']){
+        $prefixList=_cachedQuerys.$this->__modelo;
+        $prefix=md5(collect($key)->__toString());
+        $cached=Cache::get($prefixList,[]);
+        if (!in_array($prefix,$cached)){
+            $cached[] = $prefix;
+        }
+        Cache::add($prefixList,$cached);
+        Mk_debug::msgApi(['Cache Lista Añadido: '.$prefix,$cached]);
+        return $prefix;
+    }
+
+    private function clearCache(){
+        $prefixList=_cachedQuerys.$this->__modelo;
+        $cached=Cache::get($prefixList,[]);
+        Mk_debug::msgApi(['se limpia cache de: '.$prefixList,$cached]);
+        foreach ($cached as $key => $value) {
+            Cache::forget($value);
+            Mk_debug::msgApi('limpiando '.$value);
+        }
+        Cache::forget($prefixList,[]);
+        Mk_debug::msgApi(['se limpio '.$prefixList,Cache::get($prefixList,'Vacio')]);
+        return true;
     }
 }
