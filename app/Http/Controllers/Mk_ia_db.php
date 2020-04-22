@@ -17,6 +17,7 @@ const _errorAlGrabar2=-11;
 const _errorLogin=-1000;
 const _errorNoAutenticado=-1001;
 const _cachedQuerys='cachedQuerys_';
+const _cachedTime=30*24*60*60;
 
 
 
@@ -56,7 +57,7 @@ trait Mk_ia_db
 
         $prefix=$this->addCacheList([$this->__modelo,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled]);
 
-        $datos=Cache::remember($prefix, 60*60*24, function () use ($prefix,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled) {
+        $datos=Cache::remember($prefix, _cachedTime, function () use ($prefix,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled) {
             $modelo=new $this->__modelo();
             $table=$modelo->getTable();
             $consulta=$modelo->orderBy($sortBy, $order);
@@ -338,7 +339,7 @@ trait Mk_ia_db
         if (!in_array($prefix,$cached)){
             $cached[] = $prefix;
         }
-        Cache::add($prefixList,$cached);
+        Cache::add($prefixList,$cached,_cachedTime);
         Mk_debug::msgApi(['Cache Lista Añadido: '.$prefix,$cached]);
         return $prefix;
     }
