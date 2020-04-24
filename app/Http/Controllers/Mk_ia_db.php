@@ -16,33 +16,36 @@ const _errorAlGrabar=-10;
 const _errorAlGrabar2=-11;
 const _errorLogin=-1000;
 const _errorNoAutenticado=-1001;
+const _cacheQueryDebugInactive=false;
 const _cachedQuerys='cachedQuerys_';
 const _cachedTime=30*24*60*60;
 
 
 
-
+//TODO: hacer que el cache pueda ser desactivado por una constante de configuracion
 trait Mk_ia_db
 {
     public function proteger($act='',$controler=''){
 
         if (isset($this->_autorizar)) {
-            Mk_debug::msgApi(['proteger y autorizar',$this->_autorizar]);
             if (empty($controler)){
                 if (!empty($this->_autorizar)){
                     $controler=$this->_autorizar;
                 }
-
             }
-
             Mk_auth::get()->proteger($act,$controler);
         }
     }
     public function __init(Request $request)
     {
+        // if (isset($this->_autorizar)) {
+        //     Mk_debug::warning('Modulo protegido', 'AUTH', basename($this->__modelo),'info');
+        // }
         Mk_db::startDbLog();
         return true;
     }
+
+
     public function index(Request $request, $_debug=true)
     {
         $this->proteger();
@@ -55,8 +58,12 @@ trait Mk_ia_db
         $cols=$request->cols;
         $disabled=$request->disabled;
 
-        $prefix=$this->addCacheList([$this->__modelo,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled]);
 
+        $prefix=$this->addCacheList([$this->__modelo,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled]);
+        if (_cacheQueryDebugInactive){
+            Cache::forget($prefix);
+            Mk_debug::warning('Cache de QUERYS DEBUG Desabilitado!','CACHE');
+        }
         $datos=Cache::remember($prefix, _cachedTime, function () use ($prefix,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled) {
             $modelo=new $this->__modelo();
             $table=$modelo->getTable();

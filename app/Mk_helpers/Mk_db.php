@@ -45,6 +45,11 @@ class Mk_db
                 $res['_debugMsg']=Mk_debug::getMsgApi();
             }
         }
+
+        if (Mk_debug::warning()>0) {
+            $res['_warning']=Mk_debug::getWarning();
+        }
+
         if (((Mk_auth::get())->getBlockData())){
             (Mk_auth::get())->blockData(false);
             $res['ok']=-1001;

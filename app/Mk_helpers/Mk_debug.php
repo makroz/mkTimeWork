@@ -7,6 +7,7 @@ class Mk_debug
     private static $_mk_debug=-1;
     private static $_mk_debugDb=false;
     private static $msgApi=array();
+    private static $msgWarning=array();
     private static $counter=0;
 
 
@@ -34,9 +35,29 @@ class Mk_debug
         return true;
     }
 
+    public static function warning($msg='', $mod='all',$nivel='INFO',$tipo='warning')
+    {
+        $r=sizeof(self::$msgWarning);
+        if ($msg=='') {
+            if ($r==0) {
+                return false;
+            }
+            return $r;
+        }
+        $call=debug_backtrace(2,2);
+        self::$counter++;
+        $call=self::$counter.'-'.date('H:i:s').'('.basename($call[0]['file']).')'.$call[0]['line'];
+        self::$msgWarning[]=[$msg,$mod,$nivel,$tipo];
+        return true;
+    }
+
     public static function getMsgApi()
     {
         return self::$msgApi;
+    }
+    public static function getWarning()
+    {
+        return self::$msgWarning;
     }
 
     public static function isDebug()

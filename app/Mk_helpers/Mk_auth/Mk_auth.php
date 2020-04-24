@@ -3,7 +3,9 @@ namespace App\Mk_helpers\Mk_auth;
 
 use \Cache;
 use \Request;
+use App\Mk_helpers\Mk_db;
 use App\Mk_helpers\Mk_debug;
+use Illuminate\Support\Facades\DB;
 
 class Mk_auth
 {
@@ -17,13 +19,16 @@ class Mk_auth
     private $auth;
     private $blockData=false;
     private $coockie='c_sid';
-    private $__modelo='\App\Usuarios';
+    private $modelo='\App\Usuarios';
     private $timeCache=240;
 
     use \App\Mk_helpers\Mk_singleton;
 
-    public function __construct($user=null)
+    public function __construct($modelo='')
     {
+        if (!empty($modelo)){
+            $this->modelo=$modelo;
+        }
         define('__AUTH__', $this->tipo);
         define('__SECRET_KEY__', $this->secret);
         define('__AUTH_LEER__', 1);
@@ -39,6 +44,7 @@ class Mk_auth
         }
         return true;
     }
+
 
     public function blockData($bloquear)
     {
@@ -142,7 +148,7 @@ class Mk_auth
     {
         $permisos = new \App\Permisos();
         if (!empty($grupos_id)){
-            $datos= $permisos->select('permisos.slug', \Illuminate\Support\Facades\DB::raw('BIT_OR(grupos_permisos.valor|usuarios_permisos.valor) as valor'))->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
+            $datos= $permisos->select('permisos.slug', DB::raw('BIT_OR(grupos_permisos.valor|usuarios_permisos.valor) as valor'))->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
                 $join->on('permisos.id', '=', 'usuarios_permisos.permisos_id')
                      ->where('usuarios_id', '=', $usuarios_id);
             })->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
@@ -150,7 +156,7 @@ class Mk_auth
                      ->wherein('grupos_id', $grupos_id);
             })->groupBy('permisos.slug')->orderBy('permisos.name')->get();
         }else{
-            $datos= $permisos->select('permisos.slug', \Illuminate\Support\Facades\DB::raw('BIT_OR(usuarios_permisos.valor) as valor'))->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
+            $datos= $permisos->select('permisos.slug', DB::raw('BIT_OR(usuarios_permisos.valor) as valor'))->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
                 $join->on('permisos.id', '=', 'usuarios_permisos.permisos_id')
                      ->where('usuarios_id', '=', $usuarios_id);
             })->groupBy('permisos.slug')->orderBy('permisos.name')->get();
@@ -158,7 +164,7 @@ class Mk_auth
         }
 
         $d=$datos->toArray();
-        return \App\Mk_helpers\Mk_db::sendData(count($d), $d, '', $debug);
+        return Mk_db::sendData(count($d), $d, '', $debug);
     }
 
     public function login($username='',$password='',$id=0){
