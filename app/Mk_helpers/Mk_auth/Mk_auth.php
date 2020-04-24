@@ -168,7 +168,7 @@ class Mk_auth
     }
 
     public function login($username='',$password='',$id=0){
-        $modelo=new $this->__modelo();
+        $modelo=new $this->modelo();
         if (empty($id)) {
             $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])
             ->where('email', $username)->where('pass',  sha1($password))
