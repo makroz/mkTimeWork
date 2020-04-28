@@ -64,6 +64,8 @@ trait Mk_ia_db
             Cache::forget($prefix);
             Mk_debug::warning('Cache de QUERYS DEBUG Desabilitado!','CACHE');
         }
+
+        Mk_debug::msgApi(['Se busca si Existe Item Cache:'.$prefix,'Existe o no:'.Cache::has($prefix)]);
         $datos=Cache::remember($prefix, _cachedTime, function () use ($prefix,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled) {
             $modelo=new $this->__modelo();
             $table=$modelo->getTable();
@@ -298,6 +300,7 @@ trait Mk_ia_db
             if ($r==0) {
                 $r=_errorNoExiste;
                 $msg='Registro ya NO EXISTE';
+                $this->clearCache();
                 DB::rollback();
             } else {
                 $this->afterRestore($id, $datos, $r);
@@ -340,24 +343,27 @@ trait Mk_ia_db
     }
 
     private function addCacheList($key=['ok']){
-        $prefixList=_cachedQuerys.$this->__modelo;
+        $prefixList=_cachedQuerys.basename($this->__modelo);
         $prefix=md5(collect($key)->__toString());
         $cached=Cache::get($prefixList,[]);
+        Mk_debug::msgApi(['Intentando Añadir: '.$prefix,$cached]);
         if (!in_array($prefix,$cached)){
-            $cached[] = $prefix;
+            array_push($cached,$prefix);
+            Cache::put($prefixList,$cached,_cachedTime);
+            Cache::forget($prefix);
+            Mk_debug::msgApi(['Cache Lista Añadido: '.$prefix,Cache::get($prefixList,[]),$cached]);
         }
-        Cache::add($prefixList,$cached,_cachedTime);
-        Mk_debug::msgApi(['Cache Lista Añadido: '.$prefix,$cached]);
         return $prefix;
     }
 
     private function clearCache(){
-        $prefixList=_cachedQuerys.$this->__modelo;
+        $prefixList=_cachedQuerys.basename($this->__modelo);
         $cached=Cache::get($prefixList,[]);
         Mk_debug::msgApi(['se limpia cache de: '.$prefixList,$cached]);
         foreach ($cached as $key => $value) {
+            //Cache::add($value,'',1);
             Cache::forget($value);
-            Mk_debug::msgApi('limpiando '.$value);
+            Mk_debug::msgApi(['limpiando '.$value,Cache::get($value,'No existe')]);
         }
         Cache::forget($prefixList,[]);
         Mk_debug::msgApi(['se limpio '.$prefixList,Cache::get($prefixList,'Vacio')]);
