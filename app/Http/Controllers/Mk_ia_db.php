@@ -22,18 +22,18 @@ const _cachedTime=30*24*60*60;
 
 
 
-//TODO: hacer que el cache pueda ser desactivado por una constante de configuracion
+
 trait Mk_ia_db
 {
-    public function proteger($act='',$controler=''){
-
+    public function proteger($act='', $controler='')
+    {
         if (isset($this->_autorizar)) {
-            if (empty($controler)){
-                if (!empty($this->_autorizar)){
+            if (empty($controler)) {
+                if (!empty($this->_autorizar)) {
                     $controler=$this->_autorizar;
                 }
             }
-            Mk_auth::get()->proteger($act,$controler);
+            Mk_auth::get()->proteger($act, $controler);
         }
     }
     public function __init(Request $request)
@@ -60,9 +60,9 @@ trait Mk_ia_db
 
 
         $prefix=$this->addCacheList([$this->__modelo,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled]);
-        if (_cacheQueryDebugInactive){
+        if (_cacheQueryDebugInactive) {
             Cache::forget($prefix);
-            Mk_debug::warning('Cache de QUERYS DEBUG Desabilitado!','CACHE');
+            Mk_debug::warning('Cache de QUERYS DEBUG Desabilitado!', 'CACHE');
         }
 
         Mk_debug::msgApi(['Se busca si Existe Item Cache:'.$prefix,'Existe o no:'.Cache::has($prefix)]);
@@ -73,7 +73,7 @@ trait Mk_ia_db
 
             $where=Mk_db::getWhere($buscarA);
 
-            if ($recycled==1){
+            if ($recycled==1) {
                 $consulta=$consulta->onlyTrashed();
             }
 
@@ -95,7 +95,7 @@ trait Mk_ia_db
 
 
             if (isset($modelo->_withRelations)) {
-                    $consulta = $consulta->with($modelo->_withRelations);
+                $consulta = $consulta->with($modelo->_withRelations);
             }
 
             if ($cols!='') {
@@ -112,19 +112,38 @@ trait Mk_ia_db
             return  $datos;
         } else {
             $d=$datos->toArray();
-            $data = ['ok' => $d['total'], 'data' => $d['data']];
-            return Mk_db::sendData($d['total'], $d['data'], '', $_debug);
+            Mk_debug::msgApi([$request->input('_ct_', ''),md5(json_encode($d['data']))]);
+            if ($request->has('_ct_')) {
+                if ($request->input('_ct_', '')==md5(json_encode($d['data']))) {
+                    $d['data']='_ct_';
+                }
+            }
+
+
+            return Mk_db::sendData($d['total'], $d['data'], '', $_debug, true);
         }
     }
 
-    public function beforeDel($id, $modelo){}
-    public function afterDel($id, $modelo, $error=0){}
+    public function beforeDel($id, $modelo)
+    {
+    }
+    public function afterDel($id, $modelo, $error=0)
+    {
+    }
 
-    public function beforeRestore($id, $modelo){}
-    public function afterRestore($id, $modelo, $error=0){}
+    public function beforeRestore($id, $modelo)
+    {
+    }
+    public function afterRestore($id, $modelo, $error=0)
+    {
+    }
 
-    public function beforeSave(Request $request, $modelo, $action=1){}
-    public function afterSave(Request $request, $modelo, $error=0, $action=1){}
+    public function beforeSave(Request $request, $modelo, $action=1)
+    {
+    }
+    public function afterSave(Request $request, $modelo, $error=0, $action=1)
+    {
+    }
 
     public function store(Request $request)
     {
@@ -133,7 +152,7 @@ trait Mk_ia_db
         try {
             $datos = new $this->__modelo();
             $rules=$datos->getRules($request);
-            if (!empty($rules)){
+            if (!empty($rules)) {
                 $validatedData = $request->validate($rules);
             }
 
@@ -168,31 +187,33 @@ trait Mk_ia_db
     {
         try {
             $this->proteger();
-        $datos= new $this->__modelo;
-        $key=$datos->getKeyName();
-        $datos = $datos->where(str_replace("'", "",DB::connection()->getPdo()->quote( $request->where)),
-                                str_replace("'", "",DB::connection()->getPdo()->quote( $request->valor)))
-                        ->where($datos->getKeyName(),'!=',$id);
-        if (empty($request->existe)){
-            $datos = $datos->first();
-            if (!$datos){
-                $id=-1;
-            }else{
-                $id=$datos->$key;
-            }
-            return Mk_db::sendData($id, $datos);
-        }else{
-            $datos = $datos->select($key)->first();
-            if (!$datos){
-                $id=-1;
-            }else{
-                $id=$datos->$key;
-            }
+            $datos= new $this->__modelo;
+            $key=$datos->getKeyName();
+            $datos = $datos->where(
+                str_replace("'", "", DB::connection()->getPdo()->quote($request->where)),
+                str_replace("'", "", DB::connection()->getPdo()->quote($request->valor))
+            )
+                        ->where($datos->getKeyName(), '!=', $id);
+            if (empty($request->existe)) {
+                $datos = $datos->first();
+                if (!$datos) {
+                    $id=-1;
+                } else {
+                    $id=$datos->$key;
+                }
+                return Mk_db::sendData($id, $datos);
+            } else {
+                $datos = $datos->select($key)->first();
+                if (!$datos) {
+                    $id=-1;
+                } else {
+                    $id=$datos->$key;
+                }
 
-            return Mk_db::sendData($id);
-        }
+                return Mk_db::sendData($id);
+            }
         } catch (\Throwable $th) {
-            return Mk_db::sendData(-2,null,$th->getMessage());
+            return Mk_db::sendData(-2, null, $th->getMessage());
         }
     }
 
@@ -213,7 +234,7 @@ trait Mk_ia_db
         try {
             $datos = new $this->__modelo();
             $rules=$datos->getRules($request);
-            if (!empty($rules)){
+            if (!empty($rules)) {
                 $validatedData = $request->validate($rules);
             }
             $this->beforeSave($request, $datos, 2);
@@ -237,7 +258,6 @@ trait Mk_ia_db
             $msg='Error mientras se Actualizaba: '.$th->getLine().':'.$th->getFile().'='.$th->getMessage();
         }
         if (!$request->ajax()) {
-
             return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
     }
@@ -251,10 +271,11 @@ trait Mk_ia_db
         try {
             $datos = new $this->__modelo();
             $this->beforeDel($id, $datos);
-            if ($recycled==1){
+            if ($recycled==1) {
                 $r=$datos->onlyTrashed()->wherein('id', $id)
-                ->forceDelete();;
-            }else{
+                ->forceDelete();
+                ;
+            } else {
                 $datos->runCascadingDeletes($id);
                 $r=$datos->wherein('id', $id)
                 ->delete();
@@ -293,8 +314,8 @@ trait Mk_ia_db
             }
             $datos = new $this->__modelo();
             $this->beforeRestore($id, $datos);
-                $datos->runCascadingDeletes($id,true);
-                $r=$datos->onlyTrashed()->wherein('id', $id)
+            $datos->runCascadingDeletes($id, true);
+            $r=$datos->onlyTrashed()->wherein('id', $id)
                 ->restore();
             $msg='';
             if ($r==0) {
@@ -342,31 +363,58 @@ trait Mk_ia_db
         }
     }
 
-    private function addCacheList($key=['ok']){
+    private function addCacheList($key=['ok'])
+    {
         $prefixList=_cachedQuerys.basename($this->__modelo);
         $prefix=md5(collect($key)->__toString());
-        $cached=Cache::get($prefixList,[]);
+        $cached=Cache::get($prefixList, []);
+        //$cachedToken=Cache::get($prefixList.'Token', 1);
+        //Mk_debug::msgApi(['Intentando Añadir: '.$prefix.'('.$cachedToken.')',$cached]);
         Mk_debug::msgApi(['Intentando Añadir: '.$prefix,$cached]);
-        if (!in_array($prefix,$cached)){
-            array_push($cached,$prefix);
-            Cache::put($prefixList,$cached,_cachedTime);
+        if (!in_array($prefix, $cached)) {
+            array_push($cached, $prefix);
+            Cache::put($prefixList, $cached, _cachedTime);
             Cache::forget($prefix);
-            Mk_debug::msgApi(['Cache Lista Añadido: '.$prefix,Cache::get($prefixList,[]),$cached]);
+            Mk_debug::msgApi(['Cache Lista Añadido: '.$prefix,Cache::get($prefixList, []),$cached]);
         }
         return $prefix;
     }
 
-    private function clearCache(){
-        $prefixList=_cachedQuerys.basename($this->__modelo);
-        $cached=Cache::get($prefixList,[]);
+    public function getCacheKey()
+    {
+        return _cachedQuerys.basename($this->__modelo);
+    }
+
+    // public function getCacheTokenKey()
+    // {
+    //     return $this.getCacheKey().'Token';
+    // }
+
+    // public function getCacheToken()
+    // {
+    //     return $Cache::get($this.getCacheTokenKey(), 1);
+    // }
+
+    // public function setCacheToken($valor)
+    // {
+    //     return $Cache::put($this.getCacheTokenKey(), $valor);
+    // }
+
+    private function clearCache()
+    {
+        $prefixList=$this->getCacheKey();
+        $cached=Cache::get($prefixList, []);
+        //$cachedToken=$this->getCacheToken();
         Mk_debug::msgApi(['se limpia cache de: '.$prefixList,$cached]);
         foreach ($cached as $key => $value) {
             //Cache::add($value,'',1);
             Cache::forget($value);
-            Mk_debug::msgApi(['limpiando '.$value,Cache::get($value,'No existe')]);
+            Mk_debug::msgApi(['limpiando '.$value,Cache::get($value, 'No existe')]);
         }
-        Cache::forget($prefixList,[]);
-        Mk_debug::msgApi(['se limpio '.$prefixList,Cache::get($prefixList,'Vacio')]);
+        Cache::forget($prefixList, []);
+        //$cachedToken++;
+        //$this->setCacheToken($cachedToken);
+        Mk_debug::msgApi(['se limpio '.$prefixList,Cache::get($prefixList, 'Vacio')]);
         return true;
     }
 }

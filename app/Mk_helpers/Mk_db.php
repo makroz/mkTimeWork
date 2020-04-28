@@ -2,10 +2,10 @@
 
 namespace App\Mk_helpers;
 
-use App\Mk_helpers\Mk_auth\Mk_auth;
-
 use App\Mk_helpers\Mk_debug;
+
 use Illuminate\Support\Facades\DB;
+use App\Mk_helpers\Mk_auth\Mk_auth;
 
 class Mk_db
 {
@@ -20,6 +20,7 @@ class Mk_db
 
     public static function sendData($ok, $data=null, $msg='', $_debug=true)
     {
+
         $res = ['ok' => $ok];
         if ($data!==null) {
             $res['data']= $data;
@@ -29,13 +30,15 @@ class Mk_db
         }
         $token=Mk_auth::get()->getNewToken();
 
-        if ($_debug) {
+        if ($_debug) {//TODO:ver si en produccion se quita este if
             if (!empty($token)) {
                 MK_debug::msgApi($token);
                 //(Mk_auth::get())->setToken(null);
                 $res['_sid_']=$token;
             }
         }
+
+
 
         if ((Mk_debug::isDebug())&&($_debug)) {
             if (Mk_debug::isDebugDb()) {
