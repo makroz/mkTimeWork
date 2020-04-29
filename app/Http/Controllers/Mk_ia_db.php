@@ -112,18 +112,22 @@ trait Mk_ia_db
             return  $datos;
         } else {
             $d=$datos->toArray();
-            Mk_debug::msgApi([$request->input('_ct_', ''),md5(json_encode($d['data']))]);
-            if ($request->has('_ct_')) {
-                if ($request->input('_ct_', '')==md5(json_encode($d['data']))) {
-                    $d['data']='_ct_';
-                }
-            }
-
+            //Mk_debug::msgApi([$request->input('_ct_', ''),md5(json_encode($d['data']))]);
+            $d['data']=$this->isCachedFront($d['data']);
 
             return Mk_db::sendData($d['total'], $d['data'], '', $_debug, true);
         }
     }
+    public function isCachedFront($data)
+    {
 
+        if (\Request::has('_ct_')) {
+            if (\Request::input('_ct_', '')==md5(json_encode($data))) {
+                $data='_ct_';
+            }
+        }
+        return $data;
+    }
     public function beforeDel($id, $modelo)
     {
     }
