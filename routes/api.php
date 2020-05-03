@@ -15,8 +15,8 @@ use Illuminate\Http\Request;
 */
 
 Mk_app::setRuta('Roles');
-Mk_app::setRuta('Grupos');
-Mk_app::setRuta('Permisos',['extras'=>[
+Mk_app::setRuta('Permisos');
+Mk_app::setRuta('Grupos',['extras'=>[
     ['post','/permisos/{grupos_id}','permisos']
 ]]);
 

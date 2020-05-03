@@ -18,18 +18,6 @@ class GruposController extends Controller
         return true;
     }
 
-    public function afterDel($ids, $modelo, $error=0)
-    {
-        if ($error>=0) {
-            foreach ($ids as $key => $value) {
-                if (($value!='')and($value>0)) {
-                    $modelo->id=$value ;
-                    $modelo->permisos()->detach();
-                }
-            }
-        }
-    }
-
 
     public function afterSave(Request $request, $modelo, $error=0, $action=1)
     {
@@ -49,16 +37,36 @@ class GruposController extends Controller
     public function permisos(Request $request, $grupos_id)
     {
         $permisos = new \App\Permisos();
-        $datos= $permisos->select('permisos.id', 'permisos.name', 'grupos_permisos.valor', 'permisos.slug')->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
+        $datos= $permisos->select('permisos.id', 'permisos.name', 'grupos_permisos.valor', 'permisos.slug')
+        ->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
             $join->on('permisos.id', '=', 'permisos_id')
                  ->where('grupos_id', '=', $grupos_id);
-        })->get();
+        })->orderBy('permisos.name')->get();
 
         if ($request->ajax()) {
             return  $datos;
         } else {
             $d=$datos->toArray();
-            return \App\Mk_helpers\Mk_db::sendData(count($d), $d);
+            $ok=count($d);
+            $d=$this->isCachedFront($d);
+            return \App\Mk_helpers\Mk_db::sendData($ok, $d);
         }
     }
+
+
+    // public function permisos(Request $request, $grupos_id)
+    // {
+    //     $permisos = new \App\Permisos();
+    //     $datos= $permisos->select('permisos.id', 'permisos.name', 'grupos_permisos.valor', 'permisos.slug')->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
+    //         $join->on('permisos.id', '=', 'permisos_id')
+    //              ->where('grupos_id', '=', $grupos_id);
+    //     })->get();
+
+    //     if ($request->ajax()) {
+    //         return  $datos;
+    //     } else {
+    //         $d=$datos->toArray();
+    //         return \App\Mk_helpers\Mk_db::sendData(count($d), $d);
+    //     }
+    // }
 }
