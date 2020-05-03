@@ -20,9 +20,11 @@ class CreateModUsuariosV1 extends Migration
         Schema::dropIfExists($nTable);
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
+
             $table->smallIncrements('id');
             $table->string('name', 20);
             $table->string('descrip', 200)->nullable();
+
             $table->char('status', 1)->default('1');
             $table->timestamps();
             $table->softDeletes();
@@ -32,26 +34,26 @@ class CreateModUsuariosV1 extends Migration
         Schema::dropIfExists($nTable);
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
+
             $table->increments('id');
             $table->string('slug', 20)->unique();
             $table->string('name', 100);
-
             $table->string('descrip', 200)->nullable();
 
             $table->char('status', 1)->default('1');
             $table->timestamps();
             $table->softDeletes();
-            //$table->smallInteger('fk_grupos_permisos')->unsigned();
-            //$table->foreign('fk_grupos_permisos')->references('id')->on('grupos_permisos')->onDelete('cascade')->onUpdate('cascade');
         });
 
         $nTable='grupos';
         Schema::dropIfExists($nTable);
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
+
             $table->smallIncrements('id');
             $table->string('name', 100);
             $table->string('descrip', 200)->nullable();
+
             $table->char('status', 1)->default('1');
             $table->timestamps();
             $table->softDeletes();
@@ -62,17 +64,15 @@ class CreateModUsuariosV1 extends Migration
         Schema::dropIfExists($nTable);
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
-//            $table->smallIncrements('id');
+
             $table->unsignedTinyInteger('valor')->default(0);
-            //$table->char('status', 1)->default('1');
-//            $table->timestamps();
-//            $table->softDeletes();
+
+            $table->softDeletes();
+
             $table->integer('permisos_id')->unsigned();
             $table->foreign('permisos_id')->references('id')->on('permisos')->onDelete('cascade')->onUpdate('cascade');
             $table->smallInteger('grupos_id')->unsigned();
             $table->foreign('grupos_id')->references('id')->on('grupos')->onDelete('cascade')->onUpdate('cascade');
-            $table->softDeletes();
-            //$table->unique(['grupos_id', 'permisos_id']);
         });
 
 
@@ -80,16 +80,18 @@ class CreateModUsuariosV1 extends Migration
         Schema::dropIfExists($nTable);
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
+
             $table->increments('id');
             $table->string('name', 100);
             $table->string('email', 100)>unique();
             $table->string('pass', 30);
-            $table->char('activo', 1)->default('0');
-            $table->rememberToken();
-            $table->char('status', 1)->default('1');
             $table->smallInteger('rolActivo')->default(0);
+            $table->rememberToken();
+
+            $table->char('status', 1)->default('1');
             $table->timestamps();
             $table->softDeletes();
+
             $table->smallInteger('roles_id')->unsigned();
             $table->foreign('roles_id')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
         });
@@ -99,27 +101,28 @@ class CreateModUsuariosV1 extends Migration
         Schema::dropIfExists($nTable);
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
-            //    $table->increments('id');
+
             $table->unsignedTinyInteger('valor')->default(0);
+
+            $table->softDeletes();
+
             $table->integer('usuarios_id')->unsigned();
             $table->foreign('usuarios_id')->references('id')->on('usuarios')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('permisos_id')->unsigned();
             $table->foreign('permisos_id')->references('id')->on('permisos')->onDelete('cascade')->onUpdate('cascade');
-            $table->softDeletes();
-            //$table->unique(['usuarios_id','permisos_id']);
         });
 
         $nTable='usuarios_grupos';
         Schema::dropIfExists($nTable);
         Schema::create($nTable, function (Blueprint $table) {
             $table->engine ='InnoDB';
-//            $table->increments('id');
+
+            $table->softDeletes();
+
             $table->integer('usuarios_id')->unsigned();
             $table->foreign('usuarios_id')->references('id')->on('usuarios')->onDelete('cascade')->onUpdate('cascade');
             $table->smallInteger('grupos_id')->unsigned();
             $table->foreign('grupos_id')->references('id')->on('grupos')->onDelete('cascade')->onUpdate('cascade');
-            $table->softDeletes();
-            //$table->unique(['usuarios_id', 'grupos_id']);
         });
 
         Schema::enableForeignKeyConstraints();
