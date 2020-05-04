@@ -30,9 +30,10 @@ class Mk_db
         }
         $token=Mk_auth::get()->getNewToken();
 
-        if ($_debug) {//TODO:ver si en produccion se quita este if
+        if ($_debug) {
             if (!empty($token)) {
                 MK_debug::msgApi($token);
+                //Aqui podria extenderse el tiempo del token
                 //(Mk_auth::get())->setToken(null);
                 $res['_sid_']=$token;
             }
@@ -66,7 +67,6 @@ class Mk_db
     public static function getWhere($buscarA='')
     {
         $where='';
-        //$crit=array();
         if ($buscarA!='') {
             $buscarA=json_decode($buscarA, true);
             $union='';
@@ -152,8 +152,6 @@ class Mk_db
                 }
             }
         }
-
-
         return $where;
     }
 }

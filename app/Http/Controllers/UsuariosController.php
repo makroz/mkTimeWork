@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
+//use Illuminate\Support\Facades\App;
 
 class UsuariosController extends Controller
 {
     use Mk_ia_db;
     public $_autorizar='';
-    public $_validators=[];
+    //public $_validators=[];
 
 
     private $__modelo='\App\Usuarios';
