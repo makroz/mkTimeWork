@@ -118,11 +118,14 @@ trait Mk_ia_db
             return Mk_db::sendData($d['total'], $d['data'], '', $_debug, true);
         }
     }
-    public function isCachedFront($data)
+    public function isCachedFront($data,$ct=1)
     {
-
-        if (\Request::has('_ct_')) {
-            if (\Request::input('_ct_', '')==md5(json_encode($data))) {
+        $_ct='_ct_';
+        if ($ct!=1){
+            $_ct='_ct2_';
+        }
+        if (\Request::has($_ct)) {
+            if (\Request::input($_ct, '')==md5(json_encode($data))) {
                 $data='_ct_';
             }
         }

@@ -63,11 +63,11 @@ class UsuariosController extends Controller
             $d=$datos->toArray();
             $ok=count($d);
             $d=$this->isCachedFront($d);
-            return \App\Mk_helpers\Mk_db::sendData($ok, $d, $this->permisosGrupos($request, 0, false));
+            return \App\Mk_helpers\Mk_db::sendData($ok, $d, $this->permisosGrupos($request, 0, false,2));
         }
     }
 
-    public function permisosGrupos(Request $request, $usuarios_id=0, $debug=true)
+    public function permisosGrupos(Request $request, $usuarios_id=0, $debug=true,$lista=1)
     {
         $grupos_id=$request->grupos;
         if (!is_array($grupos_id)) {
@@ -85,7 +85,7 @@ class UsuariosController extends Controller
         } else {
             $d=$datos->toArray();
             $ok=count($d);
-            $d=$this->isCachedFront($d);//paso 1 para cachear el front
+            $d=$this->isCachedFront($d,$lista);//paso 1 para cachear el front
             return \App\Mk_helpers\Mk_db::sendData($ok, $d, '', $debug);
         }
     }
