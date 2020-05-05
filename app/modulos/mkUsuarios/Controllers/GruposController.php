@@ -1,14 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\modulos\mkUsuarios\Controllers;
+use  App\modulos\mkBase\Controller;
+use App\modulos\mkBase\Mk_ia_db;
+use App\modulos\mkBase\Mk_Helpers\Mk_db;
 use Illuminate\Http\Request;
+
 class GruposController extends Controller
 {
     use Mk_ia_db;
 
 
-    private $__modelo='\App\Grupos';
+    private $__modelo='\App\modulos\mkUsuarios\Grupos';
 
     public function __construct(Request $request)
     {
@@ -34,7 +37,8 @@ class GruposController extends Controller
 
     public function permisos(Request $request, $grupos_id)
     {
-        $permisos = new \App\Permisos();
+        $model='App\modulos\mkUsuarios\Permisos';
+        $permisos = new $model();
         $datos= $permisos->select('permisos.id', 'permisos.name', 'grupos_permisos.valor', 'permisos.slug')
         ->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
             $join->on('permisos.id', '=', 'permisos_id')
@@ -47,7 +51,7 @@ class GruposController extends Controller
             $d=$datos->toArray();
             $ok=count($d);
             $d=$this->isCachedFront($d);
-            return \App\Mk_helpers\Mk_db::sendData($ok, $d);
+            return Mk_db::sendData($ok, $d);
         }
     }
 }

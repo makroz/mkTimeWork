@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Mk_helpers;
+namespace App\modulos\mkBase\Mk_helpers;
 
-use App\Mk_helpers\Mk_debug;
+use App\modulos\mkBase\Mk_helpers\Mk_debug;
 
 use Illuminate\Support\Facades\DB;
-use App\Mk_helpers\Mk_auth\Mk_auth;
+use App\modulos\mkBase\Mk_helpers\Mk_auth\Mk_auth;
 
 class Mk_db
 {

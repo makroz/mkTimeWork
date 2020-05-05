@@ -1,12 +1,12 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\modulos\mkBase;
 
-use \App\Mk_helpers\Mk_db;
-use \App\Mk_helpers\Mk_debug;
-use \App\Mk_helpers\Mk_forms;
+use \App\modulos\mkBase\Mk_helpers\Mk_db;
+use \App\modulos\mkBase\Mk_helpers\Mk_debug;
+use \App\modulos\mkBase\Mk_helpers\Mk_forms;
 use \Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use \App\Mk_helpers\Mk_auth\Mk_auth;
+use \App\modulos\mkBase\Mk_helpers\Mk_auth\Mk_auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 

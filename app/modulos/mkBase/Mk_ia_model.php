@@ -1,7 +1,7 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\modulos\mkBase;
 
-use App\Mk_helpers\Mk_debug;
+use App\modulos\mkBase\Mk_helpers\Mk_debug;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\Relation;

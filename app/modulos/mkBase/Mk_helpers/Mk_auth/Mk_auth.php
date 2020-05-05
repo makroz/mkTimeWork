@@ -1,11 +1,12 @@
 <?php
-namespace App\Mk_helpers\Mk_auth;
+namespace App\modulos\mkBase\Mk_helpers\Mk_auth;
 
 use \Cache;
 use \Request;
-use App\Mk_helpers\Mk_db;
-use App\Mk_helpers\Mk_debug;
+use App\modulos\mkBase\Mk_helpers\Mk_db;
+use App\modulos\mkBase\Mk_helpers\Mk_debug;
 use Illuminate\Support\Facades\DB;
+use App\modulos\mkBase\Mk_helpers\Mk_singleton;
 
 class Mk_auth
 {
@@ -19,10 +20,10 @@ class Mk_auth
     private $auth;
     private $blockData=false;
     private $coockie='c_sid';
-    private $modelo='\App\Usuarios';
+    private $modelo='\App\modulos\mkUsuarios\Usuarios';
     private $timeCache=240;
 
-    use \App\Mk_helpers\Mk_singleton;
+    use Mk_singleton;
 
     public function __construct($modelo='')
     {
@@ -146,7 +147,8 @@ class Mk_auth
 
     public function permisosGruposMix($usuarios_id=0, $grupos_id=[], $debug=true)
     {
-        $permisos = new \App\Permisos();
+        $model='App\modulos\mkUsuarios\Permisos';
+        $permisos = new $model();
         if (!empty($grupos_id)){
             $datos= $permisos->select('permisos.slug', DB::raw('BIT_OR(grupos_permisos.valor|usuarios_permisos.valor) as valor'))->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
                 $join->on('permisos.id', '=', 'usuarios_permisos.permisos_id')
@@ -216,8 +218,10 @@ class Mk_auth
     {
         if ($this->_access) return true;
         $router=Request::route()->getAction();
-        $router=explode($router['namespace'].'\\', $router['controller']);
-        $router=explode('Controller@', $router[1]);
+        //$router=explode($router['namespace'].'\\', $router['controller']);
+        $router=basename($router['controller']);
+       // print_r($router);
+        $router=explode('Controller@', $router);
         if (empty($controller)){
             $controller=strtolower($router[0]);
         }
@@ -278,7 +282,7 @@ class Mk_auth
         }
 
         $this->cors();
-        echo json_encode(\App\Mk_helpers\Mk_db::sendData($code, null, $msg));
+        echo json_encode(Mk_db::sendData($code, null, $msg));
         die();
     }
 
@@ -333,7 +337,7 @@ class FactoryAuth
 {
     public static function getInstance()
     {
-        $rut=sprintf('App\MK_helpers\Mk_auth\auth\%s\Auth', __AUTH__);
+        $rut=sprintf('App\modulos\mkBase\MK_helpers\Mk_auth\auth\%s\Auth', __AUTH__);
         return new $rut();
     }
 }

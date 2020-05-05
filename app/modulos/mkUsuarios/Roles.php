@@ -1,12 +1,13 @@
 <?php
 
-namespace App;
+namespace App\modulos\mkUsuarios;
 
 use Illuminate\Database\Eloquent\Model;
+use \App\modulos\mkBase\Mk_ia_model;
 
 class Roles extends Model
 {
-    use Http\Controllers\Mk_ia_model;
+    use Mk_ia_model;
 //
     protected $fillable = ['name', 'descrip','status'];
     protected $attributes = ['status' => 1,];

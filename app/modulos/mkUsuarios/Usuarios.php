@@ -1,12 +1,13 @@
 <?php
 
-namespace App;
+namespace App\modulos\mkUsuarios;
 
 use Illuminate\Database\Eloquent\Model;
+use \App\modulos\mkBase\Mk_ia_model;
 
 class Usuarios extends Model
 {
-    use Http\Controllers\Mk_ia_model;
+    use Mk_ia_model;
 
     protected $fillable = ['name','email','pass', 'roles_id','status'];
     protected $attributes = ['status' => 1];
@@ -28,19 +29,19 @@ class Usuarios extends Model
     }
     public function permisos()
     {
-        return $this->belongsToMany('App\Permisos', 'usuarios_permisos')
+        return $this->belongsToMany('App\modulos\mkUsuarios\Permisos', 'usuarios_permisos')
         ->withPivot('valor');
     }
 
     public function grupos()
     {
-        return $this->belongsToMany('App\Grupos', 'usuarios_grupos');
+        return $this->belongsToMany('App\modulos\mkUsuarios\Grupos', 'usuarios_grupos');
 
     }
 
     public function roles()
     {
-        return $this->hasMany('App\Roles');
+        return $this->hasMany('App\modulos\mkUsuarios\Roles');
     }
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mk_helpers;
+namespace App\modulos\mkBase\Mk_helpers;
 
 class Mk_debug
 {

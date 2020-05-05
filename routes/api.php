@@ -1,6 +1,6 @@
 <?php
 
-use \App\Mk_helpers\Mk_app;
+use \App\modulos\mkBase\Mk_helpers\Mk_app;
 use Illuminate\Http\Request;
 
 /*
@@ -13,17 +13,6 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Mk_app::loadRoutes();
 
-Mk_app::setRuta('Roles');
-Mk_app::setRuta('Permisos');
-Mk_app::setRuta('Grupos',['extras'=>[
-    ['post','/permisos/{grupos_id}','permisos']
-]]);
-
-Route::post('login', 'UsuariosController@login');
-Route::post('logout', 'UsuariosController@logout');
-Mk_app::setRuta('Usuarios',['extras'=>[
-                ['post','/permisos/{grupos_id}','permisos'],
-                ['post','/permisosGrupos/{usuarios_id}','permisosGrupos']
-]]);
 

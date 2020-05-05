@@ -1,9 +1,9 @@
 <?php
-namespace App\Mk_helpers\Mk_auth\auth\token;
+namespace App\modulos\mkBase\Mk_helpers\Mk_auth\auth\token;
 
-use App\Mk_helpers\Mk_auth\JWT\JWT;
-use App\Mk_helpers\Mk_auth\IAuth;
-use App\Mk_helpers\Mk_auth\Mk_Auth;
+use App\modulos\mkBase\Mk_helpers\Mk_auth\JWT\JWT;
+use App\modulos\mkBase\Mk_helpers\Mk_auth\IAuth;
+use App\modulos\mkBase\Mk_helpers\Mk_auth\Mk_Auth;
 
 class Auth implements IAuth
 {

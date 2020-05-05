@@ -1,5 +1,5 @@
 <?php
-namespace App\Mk_helpers;
+namespace App\modulos\mkBase\Mk_helpers;
 
 trait Mk_singleton
 {

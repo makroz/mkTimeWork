@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\modulos\mkUsuarios\Controllers;
 
+use App\modulos\mkBase\Controller;
+use App\modulos\mkBase\Mk_ia_db;
 use Illuminate\Http\Request;
-//use Illuminate\Support\Facades\App;
+use App\modulos\mkBase\Mk_Helpers\Mk_Auth\Mk_Auth;
+use App\modulos\mkBase\Mk_Helpers\Mk_db;
 
 class UsuariosController extends Controller
 {
@@ -12,7 +15,7 @@ class UsuariosController extends Controller
     //public $_validators=[];
 
 
-    private $__modelo='\App\Usuarios';
+    private $__modelo='App\modulos\mkUsuarios\Usuarios';
 
     public function __construct(Request $request)
     {
@@ -50,7 +53,8 @@ class UsuariosController extends Controller
 
     public function permisos(Request $request, $usuarios_id)
     {
-        $permisos = new \App\Permisos();
+        $model='App\modulos\mkUsuarios\Permisos';
+        $permisos = new $model();
         $datos= $permisos->select('permisos.id', 'permisos.name', 'usuarios_permisos.valor', 'permisos.slug')
         ->leftJoin('usuarios_permisos', function ($join) use ($usuarios_id) {
             $join->on('permisos.id', '=', 'permisos_id')
@@ -63,7 +67,7 @@ class UsuariosController extends Controller
             $d=$datos->toArray();
             $ok=count($d);
             $d=$this->isCachedFront($d);
-            return \App\Mk_helpers\Mk_db::sendData($ok, $d, $this->permisosGrupos($request, 0, false,2));
+            return Mk_db::sendData($ok, $d, $this->permisosGrupos($request, 0, false,2));
         }
     }
 
@@ -73,8 +77,8 @@ class UsuariosController extends Controller
         if (!is_array($grupos_id)) {
             $grupos_id=[];
         }
-
-        $permisos = new \App\Permisos();
+        $model='App\modulos\mkUsuarios\Permisos';
+        $permisos = new $model();
         $datos= $permisos->select('permisos.id', \Illuminate\Support\Facades\DB::raw('BIT_OR(grupos_permisos.valor) as valor'))->leftJoin('grupos_permisos', function ($join) use ($grupos_id) {
             $join->on('permisos.id', '=', 'permisos_id')
                  ->wherein('grupos_id', $grupos_id);
@@ -86,7 +90,7 @@ class UsuariosController extends Controller
             $d=$datos->toArray();
             $ok=count($d);
             $d=$this->isCachedFront($d,$lista);//paso 1 para cachear el front
-            return \App\Mk_helpers\Mk_db::sendData($ok, $d, '', $debug);
+            return Mk_db::sendData($ok, $d, '', $debug);
         }
     }
 
@@ -94,7 +98,7 @@ class UsuariosController extends Controller
     public function login(Request $request)
     {
 
-        $Auth=\App\Mk_helpers\Mk_auth\Mk_auth::get();
+        $Auth=Mk_auth::get();
         $msg='';
         $user=$Auth->login( $request->username, $request->password);
         if (empty($user)) {
@@ -105,6 +109,6 @@ class UsuariosController extends Controller
             $r=$user['id'];
             //print_r($d);
         }
-        return \App\Mk_helpers\Mk_db::sendData($r, $user, $msg);
+        return Mk_db::sendData($r, $user, $msg);
     }
 }

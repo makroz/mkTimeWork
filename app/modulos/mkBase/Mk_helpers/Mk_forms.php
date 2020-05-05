@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Mk_helpers;
+namespace App\modulos\mkbase\Mk_helpers;
 
 use Request;
 use Session;
 use Cache;
-use App\Mk_helpers\Mk_debug;
-use App\Mk_helpers\Mk_auth\Mk_auth;
+use App\modulos\mkBase\Mk_helpers\Mk_debug;
+use App\modulos\mkBase\Mk_helpers\Mk_auth\Mk_auth;
 
 class Mk_forms
 {
@@ -39,8 +39,8 @@ class Mk_forms
     public static function getParam($name, $default='')
     {
         $clase=Request::route()->getAction();
-        $clase=explode($clase['namespace'].'\\', $clase['controller']);
-        $clase=explode('Controller@', $clase[1]);
+        $clase=basename($clase['controller']);
+        $clase=explode('Controller@', $clase);
         $clase=$clase[0];
         $ruta="params.{$clase}.{$name}";
         if (Request::has($name)){
