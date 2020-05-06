@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-$namespace="\\App\\modulos\\mkUsuarios\\Controllers\\";
+$namespace="\App\modulos\mkUsuarios\Controllers\\";
 
 Mk_app::setRuta('Roles',[],$namespace);
 Mk_app::setRuta('Permisos',[],$namespace);

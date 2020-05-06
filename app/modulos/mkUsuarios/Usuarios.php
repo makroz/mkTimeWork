@@ -41,7 +41,7 @@ class Usuarios extends Model
 
     public function roles()
     {
-        return $this->hasMany('App\modulos\mkUsuarios\Roles');
+        return $this->hasOne('App\modulos\mkUsuarios\Roles');
     }
 
 }
