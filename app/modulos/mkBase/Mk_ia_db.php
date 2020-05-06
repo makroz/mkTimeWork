@@ -187,7 +187,7 @@ trait Mk_ia_db
                 foreach ($th->errors() as $key => $value) {
                     $msgError.="\n ".$key.':'.join($value,',');
                 }
-                Mk_debug::error($msgError,'Formulario');
+                Mk_debug::error($msgError,'Validacion');
             }else{
                 Mk_debug::msgApi(['Error:',$th]);
             }
