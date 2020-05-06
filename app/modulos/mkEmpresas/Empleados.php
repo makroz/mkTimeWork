@@ -25,6 +25,6 @@ class Empleados extends Model
     }
     public function sucursales()
     {
-        return $this->hasOne('App\modulos\mkEmpresas\Sucursales');
+        return $this->belongsTo('App\modulos\mkEmpresas\Sucursales');//hasOne:el que no tiene el fk, y belongTo el que tiene el fk
     }
 }

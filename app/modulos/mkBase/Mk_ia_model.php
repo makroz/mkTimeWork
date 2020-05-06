@@ -20,9 +20,11 @@ trait Mk_ia_model
 
     public function toArray()
     {
+
         $attributes = $this->attributesToArray();
         $attributes = array_merge($attributes, $this->relationsToArray());
-        if (!empty($this->_withRelations)){
+        //Mk_debug::msgApi(['2array',$attributes]);
+        if (!empty($this->_withRelations)&&!empty($this->_pivot2Array)){
             foreach ($this->_pivot2Array as $key1 => $value1) {
                 $dat=explode(':',$value1.':id');
                 $rel=$dat[0];
@@ -32,9 +34,15 @@ trait Mk_ia_model
 
                 if (isset($attributes[$rel])) {
                     $i=[];
-                    foreach ($attributes[$rel] as $key => $value) {
-                        $i[]=$value[$piv];
-                    }
+                        foreach ($attributes[$rel] as $key => $value) {
+                            if (is_array($value)) {
+                                $i[]=$value[$piv];
+                            }else{
+                                if ($key==$piv){
+                                    $i[]=$value;
+                                }
+                            }
+                        }
                     $attributes[$rel] = $i;
                 }
             }

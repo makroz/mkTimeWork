@@ -12,8 +12,8 @@ class Sucursales extends Model
     protected $fillable = ['name','dir','email','tel','status','empresas_id'];
     protected $attributes = ['status' => 1];
 
-     public $_withRelations = ['empresas'];
-    // public $_pivot2Array = ['grupos'];
+     //public $_withRelations = ['empresas:id,name'];
+     //public $_pivot2Array = ['empresas'];
     // protected $cascadeDeletes = ['permisos','grupos'];
 
     public function getRules($request){
@@ -26,11 +26,11 @@ class Sucursales extends Model
 
     public function empresas()
     {
-        return $this->hasOne('App\modulos\mkEmpresas\Empresas');
+        return $this->belongsTo('App\modulos\mkEmpresas\Empresas');
     }
     public function empleados()
     {
-        return $this->belongsTo('App\modulos\mkEmpresas\Empleados');
+        return $this->hasOne('App\modulos\mkEmpresas\Empleados');
     }
 
 }

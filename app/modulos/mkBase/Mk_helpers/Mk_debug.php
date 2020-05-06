@@ -34,9 +34,15 @@ class Mk_debug
 
         return true;
     }
-
+    public static function error($msg='',$mod='all')
+    {
+        return self::warning($msg,$mod,'ERROR','error');
+    }
     public static function warning($msg='', $mod='all',$nivel='INFO',$tipo='warning')
     {
+        if ($mod==null){
+            $mod='all';
+        }
         $r=sizeof(self::$msgWarning);
         if ($msg=='') {
             if ($r==0) {

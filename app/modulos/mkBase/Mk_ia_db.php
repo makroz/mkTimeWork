@@ -179,10 +179,20 @@ trait Mk_ia_db
                 $r=_errorAlGrabar;
                 $msg='Error Al Grabar';
             }
-        } catch (\Throwable $th) {
+        } catch (\Throwable $th){
             DB::rollback();
             $r=_errorAlGrabar2;
-            $msg="Error mientras se Grababa: \n".$th->getMessage(). "\n ************* \n ".$th;
+            $msgError='';
+            if ($th->status==422){
+                foreach ($th->errors() as $key => $value) {
+                    $msgError.="\n ".$key.':'.join($value,',');
+                }
+                Mk_debug::error($msgError,'Formulario');
+            }else{
+                Mk_debug::msgApi(['Error:',$th]);
+            }
+
+            $msg="Error mientras se Grababa: \n".$th->getMessage().$msgError;
         }
 
         if (!$request->ajax()) {

@@ -12,8 +12,8 @@ class Empresas extends Model
     protected $fillable = ['name','email','status'];
     protected $attributes = ['status' => 1];
 
-    // public $_withRelations = ['grupos'];
-    // public $_pivot2Array = ['grupos'];
+     //public $_withRelations = ['sucursales']; //TODO: revisar porque cuando se le pone campos devuelve null
+     //public $_pivot2Array = ['sucursales'];
     // protected $cascadeDeletes = ['permisos','grupos'];
 
     public function getRules($request){
@@ -25,7 +25,7 @@ class Empresas extends Model
     }
     public function sucursales()
     {
-        return $this->belongsTo('App\modulos\mkEmpresas\Sucursales');
+        return $this->hasOne('App\modulos\mkEmpresas\Sucursales');
     }
 
 
