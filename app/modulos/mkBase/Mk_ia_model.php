@@ -51,6 +51,16 @@ trait Mk_ia_model
     }
 
 //****softdelete cascade ***
+    public function getCascadingTables($first=null)
+    {
+        $cascade[]=get_class($this);
+
+        foreach ($this->getCascadingDeletes() as $relationship) {
+            $cascade[]=get_class($this->{$relationship}()->getRelated());
+        }
+        return $cascade;
+    }
+
     public function runCascadingDeletes($ids,$restore=false)
     {
         if ($invalidCascadingRelationships = $this->hasInvalidCascadingRelationships()) {
@@ -67,10 +77,16 @@ trait Mk_ia_model
         if ($restore){
             $dato=null;
         }
-        Mk_debug::msgApi(['cacadedelete',$this->{$relationship}()->getExistenceCompareKey()]);
-        $table=$this->{$relationship}()->getRelated()->getTable();
-        $id=$this->{$relationship}()->getExistenceCompareKey();
-        Mk_debug::msgApi(['cacadedelete',$table, $id]);
+        //Mk_debug::msgApi(['cacadedelete1',$this->{$relationship}()->getExistenceCompareKey()]);
+        try {
+            $table=$this->{$relationship}()->getTable();
+            $id=$this->{$relationship}()->getForeignPivotKeyName();
+        } catch (\Throwable $th) {
+            $table=$this->{$relationship}()->getRelated()->getTable();
+            $id=$this->{$relationship}()->getExistenceCompareKey();
+        }
+
+        //Mk_debug::msgApi(['cacadedelete2',$table, $id]);
         DB::table($table)
                ->whereIn($id, $ids)
                ->update([$this->getDeletedAtColumn() =>  $dato]);
@@ -96,3 +112,4 @@ trait Mk_ia_model
         });
     }
 }
+//TODO: hacer que el restore solo recupere los borrados en el momento del destroy en este habra que guardar la misma fecha en todos y al restaurar verificar que sea de la misma fecha

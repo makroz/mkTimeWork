@@ -305,7 +305,7 @@ trait Mk_ia_db
             } else {
                 $this->afterDel($id, $datos, $r);
                 DB::commit();
-                $this->clearCache();
+                $this->clearCache(true);
             }
         } catch (\Throwable $th) {
             DB::rollback();
@@ -343,7 +343,7 @@ trait Mk_ia_db
             } else {
                 $this->afterRestore($id, $datos, $r);
                 DB::commit();
-                $this->clearCache();
+                $this->clearCache(true);
             }
         } catch (\Throwable $th) {
             DB::rollback();
@@ -376,13 +376,14 @@ trait Mk_ia_db
             }
             DB::commit();
             $this->clearCache();
+            //Cache::flush();
             return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
     }
 
     private function addCacheList($key=['ok'])
     {
-        $prefixList=_cachedQuerys.basename($this->__modelo);
+        $prefixList=$this->getCacheKey();//_cachedQuerys.basename($this->__modelo);
         $prefix=md5(collect($key)->__toString());
         $cached=Cache::get($prefixList, []);
         //$cachedToken=Cache::get($prefixList.'Token', 1);
@@ -397,9 +398,12 @@ trait Mk_ia_db
         return $prefix;
     }
 
-    public function getCacheKey()
+    public function getCacheKey($modelo=false)
     {
-        return _cachedQuerys.strtolower(basename($this->__modelo));
+        if (empty($modelo)){
+            $modelo=$this->__modelo;
+        }
+        return _cachedQuerys.strtolower(basename($modelo));
     }
 
     // public function getCacheTokenKey()
@@ -417,24 +421,29 @@ trait Mk_ia_db
     //     return $Cache::put($this.getCacheTokenKey(), $valor);
     // }
 
-    private function clearCache($prefixList=false)
+    private function clearCache($cascade=false)
     {
-        if (empty($prefixList)){
-            $prefixList=$this->getCacheKey();
+        $lista[]=$this->__modelo;
+        //$this->getCacheKey();
+        if ($cascade){
+            $lista=(new $this->__modelo)->getCascadingTables();
+        }
+        foreach ($lista as $key => $model) {
+            $prefixList=$this->getCacheKey($model);
+            $cached=Cache::get($prefixList, []);
+            //$cachedToken=$this->getCacheToken();
+            Mk_debug::msgApi(['se limpia cache de: '.$prefixList,$cached]);
+            foreach ($cached as $key => $value) {
+                //Cache::add($value,'',1);
+                Cache::forget($value);
+                Mk_debug::msgApi(['limpiando '.$value,Cache::get($value, 'No existe')]);
+            }
+            Cache::forget($prefixList, []);
+            //$cachedToken++;
+            //$this->setCacheToken($cachedToken);
+            Mk_debug::msgApi(['se limpio '.$prefixList,Cache::get($prefixList, 'Vacio')]);
         }
 
-        $cached=Cache::get($prefixList, []);
-        //$cachedToken=$this->getCacheToken();
-        Mk_debug::msgApi(['se limpia cache de: '.$prefixList,$cached]);
-        foreach ($cached as $key => $value) {
-            //Cache::add($value,'',1);
-            Cache::forget($value);
-            Mk_debug::msgApi(['limpiando '.$value,Cache::get($value, 'No existe')]);
-        }
-        Cache::forget($prefixList, []);
-        //$cachedToken++;
-        //$this->setCacheToken($cachedToken);
-        Mk_debug::msgApi(['se limpio '.$prefixList,Cache::get($prefixList, 'Vacio')]);
         return true;
     }
 }
