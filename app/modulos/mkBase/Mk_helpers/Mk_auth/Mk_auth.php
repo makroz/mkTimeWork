@@ -36,6 +36,7 @@ class Mk_auth
         define('__AUTH_EDITAR__', 2);
         define('__AUTH_CREAR__', 4);
         define('__AUTH_BORRAR__', 8);
+        define('_errorLogin',-2000);
 
         $this->auth  = FactoryAuth::getInstance();
         if (empty($user)) {
@@ -170,16 +171,20 @@ class Mk_auth
     }
 
     public function login($username='',$password='',$id=0){
-        $modelo=new $this->modelo();
-        if (empty($id)) {
-            $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])
-            ->where('email', $username)->where('pass',  sha1($password))
-        ->leftJoin('roles', 'roles.id', '=', 'roles_id')->with('grupos')->first();
-        }else{
-            $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])->where('usuarios.id', $id)
-        ->leftJoin('roles', 'roles.id', '=', 'roles_id')->with('grupos')->first();
+        try {
+            $modelo=new $this->modelo();
+            if (empty($id)) {
+                $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])
+                ->where('email', $username)->where('pass',  sha1($password))
+            ->leftJoin('roles', 'roles.id', '=', 'roles_id')->with('grupos')->first();
+            }else{
+                $datos=$modelo->select(['usuarios.id','usuarios.name','usuarios.email','usuarios.status','roles.id as rol_id','roles.name as rol'])->where('usuarios.id', $id)
+            ->leftJoin('roles', 'roles.id', '=', 'roles_id')->with('grupos')->first();
+            }
+        } catch (\Throwable $th) {
+            $user=[];
+            $this->detener(-1001,'Error de Logueo');
         }
-
         if (!$datos) {
             $user=[];
         } else {

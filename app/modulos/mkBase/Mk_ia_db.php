@@ -291,7 +291,7 @@ trait Mk_ia_db
             if ($recycled==1) {
                 $r=$datos->onlyTrashed()->wherein('id', $id)
                 ->forceDelete();
-                ;
+
             } else {
                 $datos->runCascadingDeletes($id);
                 $r=$datos->wherein('id', $id)
@@ -399,7 +399,7 @@ trait Mk_ia_db
 
     public function getCacheKey()
     {
-        return _cachedQuerys.basename($this->__modelo);
+        return _cachedQuerys.strtolower(basename($this->__modelo));
     }
 
     // public function getCacheTokenKey()
@@ -417,9 +417,12 @@ trait Mk_ia_db
     //     return $Cache::put($this.getCacheTokenKey(), $valor);
     // }
 
-    private function clearCache()
+    private function clearCache($prefixList=false)
     {
-        $prefixList=$this->getCacheKey();
+        if (empty($prefixList)){
+            $prefixList=$this->getCacheKey();
+        }
+
         $cached=Cache::get($prefixList, []);
         //$cachedToken=$this->getCacheToken();
         Mk_debug::msgApi(['se limpia cache de: '.$prefixList,$cached]);

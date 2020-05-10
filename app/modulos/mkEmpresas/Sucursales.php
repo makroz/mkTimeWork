@@ -12,9 +12,9 @@ class Sucursales extends Model
     protected $fillable = ['name','dir','email','tel','status','empresas_id'];
     protected $attributes = ['status' => 1];
 
-     //public $_withRelations = ['empresas:id,name'];
+     public $_withRelations = ['empleados'];
      //public $_pivot2Array = ['empresas'];
-    // protected $cascadeDeletes = ['permisos','grupos'];
+     protected $cascadeDeletes = ['empleados'];
 
     public function getRules($request){
         return [
@@ -30,7 +30,7 @@ class Sucursales extends Model
     }
     public function empleados()
     {
-        return $this->hasOne('App\modulos\mkEmpresas\Empleados');
+        return $this->hasMany('App\modulos\mkEmpresas\Empleados');
     }
 
 }

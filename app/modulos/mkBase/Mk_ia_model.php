@@ -54,7 +54,7 @@ trait Mk_ia_model
     public function runCascadingDeletes($ids,$restore=false)
     {
         if ($invalidCascadingRelationships = $this->hasInvalidCascadingRelationships()) {
-            throw CascadeSoftDeleteException::invalidRelationships($invalidCascadingRelationships);
+            throw \exception($invalidCascadingRelationships);
         }
         foreach ($this->getActiveCascadingDeletes() as $relationship) {
             $this->cascadeSoftDeletes($relationship,$ids,$restore);
@@ -67,8 +67,10 @@ trait Mk_ia_model
         if ($restore){
             $dato=null;
         }
-        $table=$this->{$relationship}()->getTable();
-        $id=$this->{$relationship}()->getForeignPivotKeyName();
+        Mk_debug::msgApi(['cacadedelete',$this->{$relationship}()->getExistenceCompareKey()]);
+        $table=$this->{$relationship}()->getRelated()->getTable();
+        $id=$this->{$relationship}()->getExistenceCompareKey();
+        Mk_debug::msgApi(['cacadedelete',$table, $id]);
         DB::table($table)
                ->whereIn($id, $ids)
                ->update([$this->getDeletedAtColumn() =>  $dato]);
@@ -89,6 +91,7 @@ trait Mk_ia_model
     protected function getActiveCascadingDeletes()
     {
         return array_filter($this->getCascadingDeletes(), function ($relationship) {
+           // Mk_debug::msgApi(['activecacadedelete',$relationship, is_null($this->{$relationship})]);
             return ! is_null($this->{$relationship});
         });
     }
