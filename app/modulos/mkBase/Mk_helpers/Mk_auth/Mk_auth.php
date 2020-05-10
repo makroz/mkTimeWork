@@ -36,7 +36,7 @@ class Mk_auth
         define('__AUTH_EDITAR__', 2);
         define('__AUTH_CREAR__', 4);
         define('__AUTH_BORRAR__', 8);
-        define('_errorLogin',-2000);
+        define('_errorLogin',-1001);
 
         $this->auth  = FactoryAuth::getInstance();
         if (empty($user)) {
@@ -183,7 +183,7 @@ class Mk_auth
             }
         } catch (\Throwable $th) {
             $user=[];
-            $this->detener(-1001,'Error de Logueo');
+            $this->detener(_errorLogin,'Error de Logueo');
         }
         if (!$datos) {
             $user=[];
@@ -287,6 +287,7 @@ class Mk_auth
         }
 
         $this->cors();
+        Mk_debug::error($msg);
         echo json_encode(Mk_db::sendData($code, null, $msg));
         die();
     }
