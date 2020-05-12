@@ -12,9 +12,9 @@ class Sucursales extends Model
     protected $fillable = ['name','dir','email','tel','status','empresas_id'];
     protected $attributes = ['status' => 1];
 
-     public $_withRelations = ['empleados'];
+     //public $_withRelations = ['empleados'];
      //public $_pivot2Array = ['empresas'];
-     protected $cascadeDeletes = ['empleados'];
+     protected $cascadeDeletes = ['empleados'];//TODO: quitar esto despues ya que no deberia borrarse el empleado es solo por preubas
 
     public function getRules($request){
         return [

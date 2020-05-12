@@ -16,7 +16,7 @@ const _errorAlGrabar=-10;
 const _errorAlGrabar2=-11;
 const _errorLogin=-1000;
 const _errorNoAutenticado=-1001;
-const _cacheQueryDebugInactive=false;
+const _cacheQueryDebugInactive=true;
 const _cachedQuerys='cachedQuerys_';
 const _cachedTime=30*24*60*60;
 
@@ -45,7 +45,6 @@ trait Mk_ia_db
         return true;
     }
 
-
     public function index(Request $request, $_debug=true)
     {
         $this->proteger();
@@ -57,24 +56,48 @@ trait Mk_ia_db
         $recycled=$request->recycled;
         $cols=$request->cols;
         $disabled=$request->disabled;
-
+        if ($request->has('flushCache')){
+           Cache::flush();
+        }
 
         $prefix=$this->addCacheList([$this->__modelo,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled]);
         if (_cacheQueryDebugInactive) {
             Cache::forget($prefix);
-            Mk_debug::warning('Cache de QUERYS DEBUG Desabilitado!', 'CACHE');
+            Mk_debug::warning('Cache del BACKEND Desabilitado!', 'CACHE','BackEnd');
         }
 
         Mk_debug::msgApi(['Se busca si Existe Item Cache:'.$prefix,'Existe o no:'.Cache::has($prefix)]);
         $datos=Cache::remember($prefix, _cachedTime, function () use ($prefix,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled) {
             $modelo=new $this->__modelo();
             $table=$modelo->getTable();
-            $consulta=$modelo->orderBy($sortBy, $order);
+            $consulta=$modelo->orderBy(Mk_db::tableCol($sortBy, $modelo), $order);
 
-            $where=Mk_db::getWhere($buscarA);
+            $where=Mk_db::getWhere($buscarA, $modelo);
 
             if ($recycled==1) {
                 $consulta=$consulta->onlyTrashed();
+            }
+            $colsJoin=[];
+            if (!empty($modelo->_joins)){
+                foreach ($modelo->_joins as $t => $d) {
+                    //Mk_debug::error($d);
+                    switch ($d['type']) {
+                        case 'left':
+                            $consulta=$consulta->leftJoin($t, ...$d['on']);
+                            break;
+                        case 'right':
+                            $consulta=$consulta->rightJoin($t, ...$d['on']);
+                            break;
+                        default:
+                            $consulta=$consulta->join($t, ...$d['on']);
+                            break;
+                    }
+                    if (!empty($d['fields'])) {
+                        $colsJoin=array_merge($colsJoin,$d['fields']);
+                        //$consulta=$consulta->addSelect(...$d['fields']);
+                    }
+
+                }
             }
 
             if ($disabled==1) {
@@ -100,17 +123,18 @@ trait Mk_ia_db
 
             if ($cols!='') {
                 $cols=explode(',', $cols);
-                $cols=array_merge([$modelo->getKeyName()], $cols);
+                $cols=array_merge([$modelo->getKeyName()], $cols,$colsJoin);
             } else {
-                $cols=array_merge([$modelo->getKeyName()], $modelo->getFill());
+                $cols=array_merge([$modelo->getKeyName()], $modelo->getFill(),$colsJoin);
             }
-            Mk_debug::msgApi('Se añadio Item Cache:'.$prefix);
-            return $consulta->paginate($perPage, $cols, 'page', $page);
+            Mk_debug::msgApi(['Se añadio Item Cache:'.$prefix,$cols,Mk_db::tableCol($cols, $modelo)]);
+            return $consulta->paginate($perPage,Mk_db::tableCol($cols,$modelo), 'page', $page);
         });
 
         if ($request->ajax()) {
             return  $datos;
         } else {
+//            dd($datos,DB::getQueryLog());
             $d=$datos->toArray();
             //Mk_debug::msgApi([$request->input('_ct_', ''),md5(json_encode($d['data']))]);
             $d['data']=$this->isCachedFront($d['data']);
@@ -376,7 +400,6 @@ trait Mk_ia_db
             }
             DB::commit();
             $this->clearCache();
-            //Cache::flush();
             return Mk_db::sendData($r, $this->index($request, false), $msg);
         }
     }

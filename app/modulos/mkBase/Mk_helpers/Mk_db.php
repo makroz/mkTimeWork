@@ -64,7 +64,32 @@ class Mk_db
         return (response()->json($res))->original;
     }
 
-    public static function getWhere($buscarA='')
+    public static function tableCol($cols,$modelo){
+        if (empty($modelo)){
+            return $cols;
+        }
+        $table=$modelo->getTable().'.';
+        $c=$cols;
+        if (!is_array($cols)){
+            $c=[];
+            $c[]=$cols;
+        }
+        foreach ($c as $key => $value) {
+            if (stripos($value,'.')===false){
+                if (in_array($value,array_merge([$modelo->getKeyName()], $modelo->getFill()))){
+                    $c[$key]=$table.$value;
+                }
+            }
+        }
+        if (!is_array($cols)) {
+            return $c[0];
+        }else{
+                return $c;
+        }
+
+    }
+
+    public static function getWhere($buscarA='',$modelo='')
     {
         $where='';
         if ($buscarA!='') {
@@ -73,7 +98,7 @@ class Mk_db
             foreach ($buscarA as $key => $value) {
                 $value['campo']=DB::connection()->getPdo()->quote($value['campo']);
                 $value['campo']=substr($value['campo'], 1, -1);
-
+                $value['campo']=self::tableCol($value['campo'],$modelo);
                 $value['criterio']=DB::connection()->getPdo()->quote($value['criterio']);
                 $value['criterio']=substr($value['criterio'], 1, -1);
                 if ($value['criterio']!='') {
