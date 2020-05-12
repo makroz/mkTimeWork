@@ -65,7 +65,7 @@ class Mk_db
     }
 
     public static function tableCol($cols,$modelo){
-        if (empty($modelo)){
+        if (empty($modelo)||(empty($modelo->joined))){
             return $cols;
         }
         $table=$modelo->getTable().'.';

@@ -18,6 +18,7 @@ class Empleados extends Model
             'on'=>['sucursales.id','=','empleados.sucursales_id']
         ],
         'empresas'=>[
+            'onSearch'=>true,
             'type'=>'left',
             'fields'=>['empresas.name as emp_name', 'empresas.id as empresas_id'],
             'on'=>['empresas.id','=','sucursales.empresas_id']

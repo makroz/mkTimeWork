@@ -70,6 +70,15 @@ trait Mk_ia_db
         $datos=Cache::remember($prefix, _cachedTime, function () use ($prefix,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled) {
             $modelo=new $this->__modelo();
             $table=$modelo->getTable();
+
+            if ($cols!='') {
+                $cols=explode(',', $cols);
+                $cols=array_merge([$modelo->getKeyName()], $cols);
+            } else {
+                $cols=array_merge([$modelo->getKeyName()], $modelo->getFill());
+            }
+            $modelo->isJoined($buscarA);
+
             $consulta=$modelo->orderBy(Mk_db::tableCol($sortBy, $modelo), $order);
 
             $where=Mk_db::getWhere($buscarA, $modelo);
@@ -78,10 +87,15 @@ trait Mk_ia_db
                 $consulta=$consulta->onlyTrashed();
             }
             $colsJoin=[];
-            if (!empty($modelo->_joins)){
-                foreach ($modelo->_joins as $t => $d) {
-                    //Mk_debug::error($d);
-                    switch ($d['type']) {
+            if ($modelo->joined) {
+
+                if (!empty($modelo->_joins)) {
+                    //Mk_debug::msgApi('Entro a modelo Joins')
+                    foreach ($modelo->_joins as $t => $d) {
+                        Mk_debug::msgApi(['Entro a modelo Joins'.$t,((empty($d['onSearh']))||(($d['onSearh']===true)&&($d[joined]===true)))]);
+                        if ((empty($d['onSearh']))||(($d['onSearh']===true)&&($d[joined]===true))) {
+                            Mk_debug::msgApi(['Entro al if ',$d['on']]);
+                        switch ($d['type']) {
                         case 'left':
                             $consulta=$consulta->leftJoin($t, ...$d['on']);
                             break;
@@ -91,12 +105,13 @@ trait Mk_ia_db
                         default:
                             $consulta=$consulta->join($t, ...$d['on']);
                             break;
-                    }
-                    if (!empty($d['fields'])) {
-                        $colsJoin=array_merge($colsJoin,$d['fields']);
-                        //$consulta=$consulta->addSelect(...$d['fields']);
-                    }
-
+                         }
+                         if (!empty($d['fields'])) {
+                                $colsJoin=array_merge($colsJoin, $d['fields']);
+                                //$consulta=$consulta->addSelect(...$d['fields']);
+                        }
+                        }
+                     }
                 }
             }
 
@@ -121,12 +136,7 @@ trait Mk_ia_db
                 $consulta = $consulta->with($modelo->_withRelations);
             }
 
-            if ($cols!='') {
-                $cols=explode(',', $cols);
-                $cols=array_merge([$modelo->getKeyName()], $cols,$colsJoin);
-            } else {
-                $cols=array_merge([$modelo->getKeyName()], $modelo->getFill(),$colsJoin);
-            }
+            $cols=array_merge($cols,$colsJoin);
             Mk_debug::msgApi(['Se añadio Item Cache:'.$prefix,$cols,Mk_db::tableCol($cols, $modelo)]);
             return $consulta->paginate($perPage,Mk_db::tableCol($cols,$modelo), 'page', $page);
         });
