@@ -304,10 +304,12 @@ trait Mk_ia_db
             } else {
                 $this->afterSave($request, $datos, $r, 2);
                 DB::commit();
-                if (!empty($request->imageFile)) {
-                    $file=base64_decode(substr($request->imageFile, strpos($request->imageFile, ",")+1));
-                    $file=Storage::disk('public')->put($datos->getTable().'_'.$datos->id.'.png', $file);
-                    //Mk_debug::msgApi(['Imagen:', Storage::disk('public')->url($datos->getTable().'_'.$datos->id.'.png')]);
+                if (!empty($request->imgDel)) {
+                    $file=Storage::disk('public')->delete($datos->getTable().'_'.$datos->id.'.png');
+                }
+                if (!empty($request->imgFile)) {
+                    $file=base64_decode(substr($request->imgFile, strpos($request->imgFile, ",")+1));
+                    $file=Storage::disk('public')->put($datos->getTable().'_'.$datos->id.'.png', $file,'public');
                 }
                 $this->clearCache();
             }
