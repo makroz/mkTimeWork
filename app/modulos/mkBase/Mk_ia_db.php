@@ -1,14 +1,15 @@
 <?php
 namespace App\modulos\mkBase;
 
-use \App\modulos\mkBase\Mk_helpers\Mk_db;
-use \App\modulos\mkBase\Mk_helpers\Mk_debug;
-use \App\modulos\mkBase\Mk_helpers\Mk_forms;
 use \Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use \App\modulos\mkBase\Mk_helpers\Mk_auth\Mk_auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
+use \App\modulos\mkBase\Mk_helpers\Mk_db;
 use Illuminate\Support\Facades\Validator;
+use \App\modulos\mkBase\Mk_helpers\Mk_debug;
+use \App\modulos\mkBase\Mk_helpers\Mk_forms;
+use \App\modulos\mkBase\Mk_helpers\Mk_auth\Mk_auth;
 
 const _maxRowTable=1000;
 const _errorNoExiste=-1;
@@ -201,12 +202,14 @@ trait Mk_ia_db
             $this->beforeSave($request, $datos, 1);
             $r=$datos->save();
 
-
             if ($r) {
                 $r=$datos->id;
                 $msg='';
                 $this->afterSave($request, $datos, $r, 1);
                 DB::commit();
+                // $file=base64_decode(substr($request->imageFile, strpos($request->imageFile, ",")+1));
+                // Mk_debug::msgApi(['Imagen:',$file]);
+                //Storage::disk('public')->put($datos->getTable.'_'.$datos->id.'.png', $file);
                 $this->clearCache();
             } else {
                 DB::rollback();
@@ -301,6 +304,11 @@ trait Mk_ia_db
             } else {
                 $this->afterSave($request, $datos, $r, 2);
                 DB::commit();
+                if (!empty($request->imageFile)) {
+                    $file=base64_decode(substr($request->imageFile, strpos($request->imageFile, ",")+1));
+                    $file=Storage::disk('public')->put($datos->getTable().'_'.$datos->id.'.png', $file);
+                    //Mk_debug::msgApi(['Imagen:', Storage::disk('public')->url($datos->getTable().'_'.$datos->id.'.png')]);
+                }
                 $this->clearCache();
             }
         } catch (\Throwable $th) {

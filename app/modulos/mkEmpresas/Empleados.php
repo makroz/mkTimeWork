@@ -11,6 +11,7 @@ class Empleados extends Model
 
     protected $fillable = ['name','ci','email','tel','dir','status','sucursales_id'];
     protected $attributes = ['status' => 1];
+    protected $imageFile=1;
     public $_joins =[
         'sucursales'=>[
             'type'=>'left',
