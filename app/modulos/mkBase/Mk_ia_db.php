@@ -17,7 +17,7 @@ const _errorAlGrabar=-10;
 const _errorAlGrabar2=-11;
 const _errorLogin=-1000;
 const _errorNoAutenticado=-1001;
-const _cacheQueryDebugInactive=true;
+const _cacheQueryDebugInactive=false;
 const _cachedQuerys='cachedQuerys_';
 const _cachedTime=30*24*60*60;
 

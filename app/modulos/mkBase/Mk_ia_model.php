@@ -168,7 +168,6 @@ trait Mk_ia_model
     protected function getActiveCascadingDeletes()
     {
         return array_filter($this->getCascadingDeletes(), function ($relationship) {
-            // Mk_debug::msgApi(['activecacadedelete',$relationship, is_null($this->{$relationship})]);
             return ! is_null($this->{$relationship});
         });
     }
