@@ -20,8 +20,8 @@ class Usuarios extends Model
 
     public function getRules($request){
         return [
-            'name' => 'required',
-            'email' => 'required|email|unique:usuarios,email,'.$request->input('id'),
+            'name' => 'required_with:name',
+            'email' => 'required_with:email|email|unique:usuarios,email,'.$request->input('id'),
             'pass' => 'sometimes|required|min:8',
             'roles_id' => 'integer',
             'status' => 'in:0,1'

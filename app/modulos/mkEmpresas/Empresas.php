@@ -18,8 +18,8 @@ class Empresas extends Model
 
     public function getRules($request){
         return [
-            'name' => 'required',
-            'email' => 'required|email|unique:empresas,email,'.$request->input('id'),
+            'name' => 'required_with:name',
+            'email' => 'required_with:email|email|unique:empresas,email,'.$request->input('id'),
             'status' => 'in:0,1'
         ];
     }

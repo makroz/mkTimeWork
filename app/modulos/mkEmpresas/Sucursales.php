@@ -18,8 +18,8 @@ class Sucursales extends Model
 
     public function getRules($request){
         return [
-            'name' => 'required',
-            'email' => 'required|email|unique:sucursales,email,'.$request->input('id'),
+            'name' => 'required_with:name',
+            'email' => 'required_with:email|email|unique:sucursales,email,'.$request->input('id'),
             'status' => 'in:0,1'
         ];
     }

@@ -15,8 +15,8 @@ class Permisos extends Model
 
     public function getRules($request){
         return [
-        'name' => 'required',
-        'slug' => 'required|unique:permisos,slug,'.$request->input('id'),
+        'name' => 'required_with:name',
+        'slug' => 'required_with:slug|unique:permisos,slug,'.$request->input('id'),
         'status' => 'in:0,1'
     ];
     }

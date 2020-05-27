@@ -20,16 +20,19 @@ class GruposController extends Controller
     }
 
 
-    public function afterSave(Request $request, $modelo, $error=0, $action=1)
+    public function afterSave(Request $request, $modelo, $error=0, $id=0)
     {
         if ($error>=0) {
-            if ($action==2) {//modificar
-                $modelo->id=$request->id;
-                $modelo->permisos()->detach();
-            }
-            foreach ($request->paramsExtra['permisos'] as $key => $value) {
-                if ($value['valor']>0) {
-                    $modelo->permisos()->attach($value['id'], ['valor' => $value['valor']]);
+            $modelo->id=$id;
+
+                if (isset($request->paramsExtra['permisos'])) {
+                if ($id>0) {//modificar
+                        $modelo->permisos()->detach();
+                }
+                foreach ($request->paramsExtra['permisos'] as $key => $value) {
+                    if ($value['valor']>0) {
+                        $modelo->permisos()->attach($value['id'], ['valor' => $value['valor']]);
+                    }
                 }
             }
         }

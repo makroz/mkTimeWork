@@ -13,7 +13,7 @@ class Roles extends Model
     protected $attributes = ['status' => 1,];
     public function getRules($request){
         return [
-        'name' => 'required',
+        'name' => 'required_with:name',
         'status' => 'in:0,1'
         ];
     }

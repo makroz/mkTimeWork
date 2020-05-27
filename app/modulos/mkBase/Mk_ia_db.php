@@ -57,14 +57,14 @@ trait Mk_ia_db
         $recycled=$request->recycled;
         $cols=$request->cols;
         $disabled=$request->disabled;
-        if ($request->has('flushCache')){
-           Cache::flush();
+        if ($request->has('flushCache')) {
+            Cache::flush();
         }
 
         $prefix=$this->addCacheList([$this->__modelo,$page,$perPage,$sortBy,$order,$buscarA,$recycled,$cols,$disabled]);
         if (_cacheQueryDebugInactive) {
             Cache::forget($prefix);
-            Mk_debug::warning('Cache del BACKEND Desabilitado!', 'CACHE','BackEnd');
+            Mk_debug::warning('Cache del BACKEND Desabilitado!', 'CACHE', 'BackEnd');
         }
 
         Mk_debug::msgApi(['Se busca si Existe Item Cache:'.$prefix,'Existe o no:'.Cache::has($prefix)]);
@@ -89,14 +89,13 @@ trait Mk_ia_db
             }
             $colsJoin=[];
             if ($modelo->joined) {
-
                 if (!empty($modelo->_joins)) {
                     //Mk_debug::msgApi('Entro a modelo Joins')
                     foreach ($modelo->_joins as $t => $d) {
                         Mk_debug::msgApi(['Entro a modelo Joins'.$t,((empty($d['onSearh']))||(($d['onSearh']===true)&&($d[joined]===true)))]);
                         if ((empty($d['onSearh']))||(($d['onSearh']===true)&&($d[joined]===true))) {
                             Mk_debug::msgApi(['Entro al if ',$d['on']]);
-                        switch ($d['type']) {
+                            switch ($d['type']) {
                         case 'left':
                             $consulta=$consulta->leftJoin($t, ...$d['on']);
                             break;
@@ -107,12 +106,12 @@ trait Mk_ia_db
                             $consulta=$consulta->join($t, ...$d['on']);
                             break;
                          }
-                         if (!empty($d['fields'])) {
+                            if (!empty($d['fields'])) {
                                 $colsJoin=array_merge($colsJoin, $d['fields']);
                                 //$consulta=$consulta->addSelect(...$d['fields']);
+                            }
                         }
-                        }
-                     }
+                    }
                 }
             }
 
@@ -137,9 +136,9 @@ trait Mk_ia_db
                 $consulta = $consulta->with($modelo->_withRelations);
             }
 
-            $cols=array_merge($cols,$colsJoin);
+            $cols=array_merge($cols, $colsJoin);
             Mk_debug::msgApi(['Se añadio Item Cache:'.$prefix,$cols,Mk_db::tableCol($cols, $modelo)]);
-            return $consulta->paginate($perPage,Mk_db::tableCol($cols,$modelo), 'page', $page);
+            return $consulta->paginate($perPage, Mk_db::tableCol($cols, $modelo), 'page', $page);
         });
 
         if ($request->ajax()) {
@@ -153,10 +152,10 @@ trait Mk_ia_db
             return Mk_db::sendData($d['total'], $d['data'], '', $_debug, true);
         }
     }
-    public function isCachedFront($data,$ct=1)
+    public function isCachedFront($data, $ct=1)
     {
         $_ct='_ct_';
-        if ($ct!=1){
+        if ($ct!=1) {
             $_ct='_ct2_';
         }
         if (\Request::has($_ct)) {
@@ -180,10 +179,10 @@ trait Mk_ia_db
     {
     }
 
-    public function beforeSave(Request $request, $modelo, $action=1)
+    public function beforeSave(Request $request, $modelo, $id=0)
     {
     }
-    public function afterSave(Request $request, $modelo, $error=0, $action=1)
+    public function afterSave(Request $request, $modelo, $error=0, $id=0)
     {
     }
 
@@ -199,13 +198,13 @@ trait Mk_ia_db
             }
 
             $datos->fill($request->only($datos->getfill()));
-            $this->beforeSave($request, $datos, 1);
+            $this->beforeSave($request, $datos, 0);
             $r=$datos->save();
 
             if ($r) {
                 $r=$datos->id;
                 $msg='';
-                $this->afterSave($request, $datos, $r, 1);
+                $this->afterSave($request, $datos, $r, 0);
                 DB::commit();
                 // $file=base64_decode(substr($request->imageFile, strpos($request->imageFile, ",")+1));
                 // Mk_debug::msgApi(['Imagen:',$file]);
@@ -216,16 +215,16 @@ trait Mk_ia_db
                 $r=_errorAlGrabar;
                 $msg='Error Al Grabar';
             }
-        } catch (\Throwable $th){
+        } catch (\Throwable $th) {
             DB::rollback();
             $r=_errorAlGrabar2;
             $msgError='';
-            if ($th->status==422){
+            if ($th->status==422) {
                 foreach ($th->errors() as $key => $value) {
-                    $msgError.="\n ".$key.':'.join($value,',');
+                    $msgError.="\n ".$key.':'.join($value, ',');
                 }
-                Mk_debug::error($msgError,'Validacion');
-            }else{
+                Mk_debug::error($msgError, 'Validacion');
+            } else {
                 Mk_debug::msgApi(['Error:',$th]);
             }
 
@@ -287,35 +286,59 @@ trait Mk_ia_db
         DB::beginTransaction();
         try {
             $datos = new $this->__modelo();
+            $_key=$datos->getKeyName();
             $rules=$datos->getRules($request);
             if (!empty($rules)) {
+                // foreach ($rules as $key => $value) {
+                //     if (\strpos($value, 'required')!==false) {
+                //         $rules[$key]=str_replace('required|', '', $value);
+                //         $rules[$key]=str_replace('required', '', $rules[$key]);
+                //     }
+                // }
                 $validatedData = $request->validate($rules);
             }
-            $this->beforeSave($request, $datos, 2);
-            $r=$datos->where('id', '=', $id)
+            $this->beforeSave($request, $datos, $id);
+            Mk_debug::msgApi(['request',$request->only($datos->getfill())]);
+            $dataUpdate=$request->only($datos->getfill());
+            if (!empty($dataUpdate)) {
+                $r=$datos->where($_key, '=', $id)
              ->update(
                  $request->only($datos->getfill())
              );
+            }else{
+                $r=1000000;
+            }
             $msg='';
             if ($r==0) {
                 $r=_errorNoExiste;
                 $msg='Registro ya NO EXISTE';
                 DB::rollback();
             } else {
-                $this->afterSave($request, $datos, $r, 2);
+                $this->afterSave($request, $datos, $r, $id);
                 DB::commit();
+                //modulo MkImg
                 if (!empty($request->imgDel)) {
-                    $file=Storage::disk('public')->delete($datos->getTable().'_'.$datos->id.'.png');
+                    $file=Storage::disk('public')->delete($datos->getTable().'_'.$id.'.png');
                 }
                 if (!empty($request->imgFile)) {
                     $file=base64_decode(substr($request->imgFile, strpos($request->imgFile, ",")+1));
-                    $file=Storage::disk('public')->put($datos->getTable().'_'.$datos->id.'.png', $file,'public');
+                    $file=Storage::disk('public')->put($datos->getTable().'_'.$id.'.png', $file, 'public');
                 }
+                //modulo MkImg
                 $this->clearCache();
             }
         } catch (\Throwable $th) {
             DB::rollback();
             $r=_errorAlGrabar2;
+            $msgError='';
+            if ((!empty($th->status))&&($th->status==422)) {
+                foreach ($th->errors() as $key => $value) {
+                    $msgError.="\n ".$key.':'.join($value, ',');
+                }
+                Mk_debug::error($msgError, 'Validacion');
+            } else {
+                Mk_debug::msgApi(['Error:',$th]);
+            }
             $msg='Error mientras se Actualizaba: '.$th->getLine().':'.$th->getFile().'='.$th->getMessage();
         }
         if (!$request->ajax()) {
@@ -335,7 +358,6 @@ trait Mk_ia_db
             if ($recycled==1) {
                 $r=$datos->onlyTrashed()->wherein('id', $id)
                 ->forceDelete();
-
             } else {
                 $datos->runCascadingDeletes($id);
                 $r=$datos->wherein('id', $id)
@@ -443,7 +465,7 @@ trait Mk_ia_db
 
     public function getCacheKey($modelo=false)
     {
-        if (empty($modelo)){
+        if (empty($modelo)) {
             $modelo=$this->__modelo;
         }
         return _cachedQuerys.strtolower(basename($modelo));
@@ -468,7 +490,7 @@ trait Mk_ia_db
     {
         $lista[]=$this->__modelo;
         //$this->getCacheKey();
-        if ($cascade){
+        if ($cascade) {
             $lista=(new $this->__modelo)->getCascadingTables();
         }
         foreach ($lista as $key => $model) {

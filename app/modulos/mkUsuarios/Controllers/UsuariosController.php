@@ -23,29 +23,36 @@ class UsuariosController extends Controller
         return true;
     }
 
-    public function beforeSave(Request $request, $modelo, $action=1)
+    public function beforeSave(Request $request, $modelo, $id=0)
     {
-        if ($action==1){
+        if ($id==0){
             $modelo->pass= sha1($modelo->pass);
         }
     }
 
-    public function afterSave(Request $request, $modelo, $error=0, $action=1)
+    public function afterSave(Request $request, $modelo, $error=0, $id=0)
     {
         if ($error>=0) {
-            if ($action==2) {//modificar
-                $modelo->id=$request->id;
-                $modelo->permisos()->detach();
-                $modelo->grupos()->detach();
-            }
-            foreach ($request->paramsExtra['permisos'] as $key => $value) {
-                if ($value['valor']>0) {
-                    $modelo->permisos()->attach($value['id'], ['valor' => $value['valor']]);
+            $modelo->id=$id;
+
+            if (isset($request->paramsExtra['permisos'])) {
+                if ($id>0) {//modificar
+                        $modelo->permisos()->detach();
+                }
+                foreach ($request->paramsExtra['permisos'] as $key => $value) {
+                    if ($value['valor']>0) {
+                        $modelo->permisos()->attach($value['id'], ['valor' => $value['valor']]);
+                    }
                 }
             }
-            foreach ($request->paramsExtra['grupos'] as $key => $value) {
-                if ($value>0) {
-                    $modelo->grupos()->attach($value);
+            if (isset($request->paramsExtra['grupos'])) {
+                if ($id>0) {//modificar
+                    $modelo->grupos()->detach();
+                }
+                foreach ($request->paramsExtra['grupos'] as $key => $value) {
+                    if ($value>0) {
+                        $modelo->grupos()->attach($value);
+                    }
                 }
             }
         }

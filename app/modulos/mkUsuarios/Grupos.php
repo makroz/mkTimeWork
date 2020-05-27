@@ -15,7 +15,7 @@ class Grupos extends Model
 
     public function getRules($request){
         return [
-        'name' => 'required',
+        'name' => 'required_with:name',
         'status' => 'in:0,1'
         ];
     }
