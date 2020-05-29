@@ -11,12 +11,13 @@ use \App\modulos\mkBase\Mk_helpers\Mk_debug;
 use \App\modulos\mkBase\Mk_helpers\Mk_forms;
 use \App\modulos\mkBase\Mk_helpers\Mk_auth\Mk_auth;
 
-const _maxRowTable=1000;
 const _errorNoExiste=-1;
 const _errorAlGrabar=-10;
 const _errorAlGrabar2=-11;
 const _errorLogin=-1000;
 const _errorNoAutenticado=-1001;
+
+const _maxRowTable=1000;
 const _cacheQueryDebugInactive=false;
 const _cachedQuerys='cachedQuerys_';
 const _cachedTime=30*24*60*60;
@@ -186,6 +187,15 @@ trait Mk_ia_db
     {
     }
 
+    public function storeMkImg($imgDel=false,$imgFile='',$prefix='',$id=0){
+        if (!empty($imgDel)) {
+            $file=Storage::disk('public')->delete($prefix.'_'.$id.'.png');
+        }
+        if (!empty($imgFile)) {
+            $file=base64_decode(substr($imgFile, strpos($imgFile, ",")+1));
+            $file=Storage::disk('public')->put($prefix.'_'.$id.'.png', $file, 'public');
+        }
+    }
     public function store(Request $request)
     {
         $this->proteger();
@@ -206,10 +216,10 @@ trait Mk_ia_db
                 $msg='';
                 $this->afterSave($request, $datos, $r, 0);
                 DB::commit();
-                // $file=base64_decode(substr($request->imageFile, strpos($request->imageFile, ",")+1));
-                // Mk_debug::msgApi(['Imagen:',$file]);
-                //Storage::disk('public')->put($datos->getTable.'_'.$datos->id.'.png', $file);
                 $this->clearCache();
+                //modulo adicionales
+                    //MkImg
+                $this->storeMkImg($request->imgDel,$request->imgFile,$datos->getTable(),$r);
             } else {
                 DB::rollback();
                 $r=_errorAlGrabar;
@@ -289,12 +299,6 @@ trait Mk_ia_db
             $_key=$datos->getKeyName();
             $rules=$datos->getRules($request);
             if (!empty($rules)) {
-                // foreach ($rules as $key => $value) {
-                //     if (\strpos($value, 'required')!==false) {
-                //         $rules[$key]=str_replace('required|', '', $value);
-                //         $rules[$key]=str_replace('required', '', $rules[$key]);
-                //     }
-                // }
                 $validatedData = $request->validate($rules);
             }
             $this->beforeSave($request, $datos, $id);
@@ -316,16 +320,10 @@ trait Mk_ia_db
             } else {
                 $this->afterSave($request, $datos, $r, $id);
                 DB::commit();
-                //modulo MkImg
-                if (!empty($request->imgDel)) {
-                    $file=Storage::disk('public')->delete($datos->getTable().'_'.$id.'.png');
-                }
-                if (!empty($request->imgFile)) {
-                    $file=base64_decode(substr($request->imgFile, strpos($request->imgFile, ",")+1));
-                    $file=Storage::disk('public')->put($datos->getTable().'_'.$id.'.png', $file, 'public');
-                }
-                //modulo MkImg
                 $this->clearCache();
+                //modulo adicionales
+                    //MkImg
+                $this->storeMkImg($request->imgDel,$request->imgFile,$datos->getTable(),$id);
             }
         } catch (\Throwable $th) {
             DB::rollback();
